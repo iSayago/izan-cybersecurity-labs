@@ -200,7 +200,7 @@ const renderSearchResults = () => {
 
     const status = document.createElement('span');
     status.className = 'micro-label';
-    status.textContent = item.status === 'demo' ? 'DEMO' : item.status === 'pending' ? 'PENDIENTE' : 'PUBLICADO';
+    status.textContent = item.status === 'published' ? 'PUBLICADO' : 'EN REVISIÓN';
     link.appendChild(status);
 
     const title = document.createElement('span');
@@ -646,75 +646,6 @@ if (labForm) {
   labForm.addEventListener('change', () => apply());
   labForm.addEventListener('reset', () => window.setTimeout(() => apply(), 0));
 
-  apply(false);
-}
-
-/* --------------------------------------------------------------------------
-   Blog filters
-   -------------------------------------------------------------------------- */
-
-const postForm = document.querySelector<HTMLFormElement>('#post-filter-form');
-if (postForm) {
-  const search = postForm.querySelector<HTMLInputElement>('#post-search');
-  const categorySelect = postForm.querySelector<HTMLSelectElement>('#post-category');
-  const tagSelect = postForm.querySelector<HTMLSelectElement>('#post-tag');
-  const count = document.querySelector<HTMLElement>('#post-count');
-  const empty = document.querySelector<HTMLElement>('#post-empty');
-  const params = new URLSearchParams(window.location.search);
-
-  if (search && params.get('q')) search.value = params.get('q') ?? '';
-  if (categorySelect && params.get('category')) categorySelect.value = params.get('category') ?? 'all';
-  if (tagSelect && params.get('tag')) tagSelect.value = params.get('tag') ?? 'all';
-
-  const apply = (updateUrl = true) => {
-    const term = normalize(search?.value ?? '');
-    const category = categorySelect?.value ?? 'all';
-    const tag = tagSelect?.value ?? 'all';
-    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-post-item]'));
-    let visible = 0;
-
-    items.forEach((item) => {
-      const haystack = normalize(
-        [item.dataset.title, item.dataset.categories, item.dataset.tags].filter(Boolean).join(' '),
-      );
-      const matchesTerm = !term || term.split(/\s+/).every((part) => haystack.includes(part));
-      const matchesCategory =
-        category === 'all' ||
-        (item.dataset.categories ?? '')
-          .split('|')
-          .map((value) => normalize(value))
-          .includes(normalize(category));
-      const matchesTag =
-        tag === 'all' ||
-        (item.dataset.tags ?? '')
-          .split('|')
-          .map((value) => normalize(value))
-          .includes(normalize(tag));
-      const show = matchesTerm && matchesCategory && matchesTag;
-      item.classList.toggle('is-hidden', !show);
-      if (show) visible += 1;
-    });
-
-    if (count) count.textContent = `${visible} de ${items.length} publicaciones`;
-    if (empty) empty.hidden = visible !== 0;
-
-    if (updateUrl) {
-      const next = new URLSearchParams();
-      if (search?.value.trim()) next.set('q', search.value.trim());
-      if (category !== 'all') next.set('category', category);
-      if (tag !== 'all') next.set('tag', tag);
-      const suffix = next.toString() ? `?${next.toString()}` : '';
-      window.history.replaceState({}, '', `${window.location.pathname}${suffix}${window.location.hash}`);
-    }
-  };
-
-  postForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    apply();
-  });
-  postForm.addEventListener('input', () => apply());
-  postForm.addEventListener('change', () => apply());
-  postForm.addEventListener('reset', () => window.setTimeout(() => apply(), 0));
   apply(false);
 }
 

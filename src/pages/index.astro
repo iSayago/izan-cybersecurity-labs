@@ -2,34 +2,22 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHead from '../components/SectionHead.astro';
 import LabCard from '../components/LabCard.astro';
-import StatusBadge from '../components/StatusBadge.astro';
 import ContactBlock from '../components/ContactBlock.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
 import { modules } from '../data/modules';
-import {
-  countByStatus,
-  formatDate,
-  getLatestItems,
-  getLabs,
-  getPosts,
-  getResearch,
-} from '../lib/content';
+import { countByStatus, formatDate, getLabs } from '../lib/content';
 import { withBase } from '../lib/url';
 
 const labs = await getLabs();
-const posts = await getPosts();
-const research = await getResearch();
 const counts = countByStatus(labs);
-const latest = getLatestItems(labs, posts, research, 4);
-const courseModules = modules.filter((module) => module.id !== '01');
-const pendingLabel =
-  counts.pending === 1 ? '1 plantilla pendiente' : `${counts.pending} plantillas pendientes`;
+const latest = labs.slice(0, 4);
+const courseModules = modules;
 
 const featured = labs.filter((entry) => entry.data.featured);
 const primary = featured[0] ?? labs[0];
 const stack = labs.filter((entry) => entry.id !== primary?.id).slice(0, 2);
-const latestDate = latest[0]?.date;
+const latestDate = latest[0]?.data.date;
 
 const principles = [
   {
@@ -41,8 +29,8 @@ const principles = [
     body: 'Qué es real, qué es sintético y qué no permite concluir el experimento se escribe junto al resultado.',
   },
   {
-    title: 'Publicación separada del progreso',
-    body: 'Completar una práctica no publica el informe. La documentación se revisa y se publica cuando está lista.',
+    title: 'Sin resultados inventados',
+    body: 'Los vídeos y capturas muestran ejecuciones reales del laboratorio. Lo que no se grabó no se reconstruye.',
   },
 ];
 
@@ -54,28 +42,22 @@ const areas = [
     tone: '',
   },
   {
+    title: 'Log Management',
+    body: 'Fuentes, recolección y revisión de registros.',
+    state: 'Enfoque actual',
+    tone: '',
+  },
+  {
     title: 'Blue Team',
     body: 'Detección, respuesta y documentación.',
     state: 'Enfoque actual',
     tone: '',
   },
   {
-    title: 'DFIR',
-    body: 'Forense y análisis de malware.',
-    state: 'En formación',
-    tone: 'area-state-muted',
-  },
-  {
-    title: 'Pentesting',
-    body: 'Ampliación futura del perfil ofensivo.',
-    state: 'Previsto',
-    tone: 'area-state-future',
-  },
-  {
-    title: 'AI Security',
-    body: 'Línea de investigación planificada.',
-    state: 'Previsto',
-    tone: 'area-state-future',
+    title: 'Threat Detection',
+    body: 'IoCs, firmas y análisis de tráfico.',
+    state: 'Enfoque actual',
+    tone: '',
   },
 ];
 ---
@@ -99,25 +81,25 @@ const areas = [
       <div class="hero-lower">
         <div>
           <p class="hero-lede">
-            Portfolio personal de ciberseguridad. Documentación de laboratorios,
-            investigaciones técnicas y prácticas centradas en monitorización,
-            detección de amenazas, análisis de eventos y respuesta ante incidentes.
+            Portfolio personal de ciberseguridad. Documentación de laboratorios
+            centrada en monitorización, detección de amenazas, análisis de eventos
+            y respuesta ante incidentes.
           </p>
 
           <div class="hero-actions">
             <a class="btn btn-primary" href={withBase('/labs/')}>
               Explorar SOC Labs <Icon name="arrow-right" size={13} />
             </a>
-            <a class="btn btn-ghost" href={withBase('/blog/')}>
-              Leer últimas notas <Icon name="arrow-up-right" size={13} />
+            <a class="btn btn-ghost" href={withBase('/about/')}>
+              Sobre el archivo <Icon name="arrow-up-right" size={13} />
             </a>
           </div>
 
           <p class="hero-note">
             <Icon name="check" size={13} />
             <span>
-              {counts.published} informes publicados · {counts.demo} demostraciones ·
-              {pendingLabel}. El contenido DEMO está señalado.
+              {counts.published} informes publicados · {courseModules.length} módulos
+              documentados · registro audiovisual en cada práctica.
             </span>
           </p>
         </div>
@@ -143,7 +125,7 @@ const areas = [
           <div class="archive-stats">
             <div class="archive-stat">
               <strong>{String(courseModules.length).padStart(2, '0')}</strong>
-              <span>Módulos del recorrido</span>
+              <span>Módulos documentados</span>
             </div>
             <div class="archive-stat">
               <strong>{String(site.course.labsCompleted).padStart(2, '0')}</strong>
@@ -153,10 +135,6 @@ const areas = [
               <strong>{String(counts.published).padStart(2, '0')}</strong>
               <span>Informes publicados</span>
             </div>
-            <div class="archive-stat">
-              <strong>{String(counts.demo).padStart(2, '0')}</strong>
-              <span>Demos de formato</span>
-            </div>
           </div>
 
           <div class="archive-list">
@@ -164,15 +142,8 @@ const areas = [
               courseModules.map((module) => (
                 <a class="archive-row" href={withBase(`/labs/#${module.slug}`)}>
                   <b>{module.id}</b>
-                  <span
-                    class:list={[
-                      'state',
-                      module.documentation === 'in-preparation' && 'state-progress',
-                      module.documentation === 'not-started' && 'state-pending',
-                    ]}
-                    aria-hidden="true"
-                  />
-                  <span>{module.documentation === 'in-preparation' ? 'En preparación' : 'Pendiente'}</span>
+                  <span class="state" aria-hidden="true" />
+                  <span>Publicado</span>
                 </a>
               ))
             }
@@ -189,8 +160,8 @@ const areas = [
         <span>Log Management</span>
         <span>Incident Triage</span>
         <span>Threat Detection</span>
-        <span>DFIR</span>
-        <span>AI Security / Próx.</span>
+        <span>IoC Analysis</span>
+        <span>Network Security</span>
       </div>
     </div>
   </section>
@@ -200,8 +171,8 @@ const areas = [
       <SectionHead
         index="01"
         id="latest-title"
-        title="Últimas publicaciones"
-        description="Laboratorios y notas del archivo. Las piezas de demostración se identifican para no confundirlas con trabajo real."
+        title="Últimas prácticas"
+        description="Informes publicados con objetivo, procedimiento, evidencias y análisis."
         link={withBase('/labs/')}
         linkLabel="Abrir SOC Labs"
       />
@@ -210,17 +181,14 @@ const areas = [
         latest.length > 0 ? (
           <div class="entry-list">
             {latest.map((item) => (
-              <a class="entry" href={withBase(item.url)}>
+              <a class="entry" href={withBase(`/labs/${item.id}/`)}>
                 <span class="entry-meta">
-                  <span class:list={['entry-type', item.status === 'demo' && 'entry-status-demo']}>
-                    {item.label}
-                    {item.status === 'demo' ? ' / DEMO' : ''}
-                  </span>
-                  <span class="entry-date">{formatDate(item.date)}</span>
+                  <span class="entry-type">{`Módulo ${item.data.module} / Práctica ${String(item.data.practice).padStart(2, '0')}`}</span>
+                  <span class="entry-date">{formatDate(item.data.date)}</span>
                 </span>
                 <span class="entry-main">
-                  <span class="entry-title">{item.title}</span>
-                  <span class="entry-desc">{item.description}</span>
+                  <span class="entry-title">{item.data.title}</span>
+                  <span class="entry-desc">{item.data.description}</span>
                 </span>
                 <span class="entry-arrow" aria-hidden="true">
                   <Icon name="arrow-up-right" size={14} />
@@ -235,15 +203,6 @@ const areas = [
           </div>
         )
       }
-
-      {
-        counts.demo > 0 && (
-          <p class="legend-line">
-            <StatusBadge status="demo" />
-            <span>Las filas marcadas DEMO muestran el sistema de documentación; no son prácticas realizadas.</span>
-          </p>
-        )
-      }
     </div>
   </section>
 
@@ -253,7 +212,7 @@ const areas = [
         index="02"
         id="labs-title"
         title="Laboratorios en el archivo"
-        description="Módulos del programa SOC Analyst (CSA) de EC-Council. El orden y los títulos se mantienen; la documentación se publica por separado."
+        description="Módulos del programa SOC Analyst (CSA) de EC-Council con sus prácticas publicadas."
         link={withBase('/labs/')}
         linkLabel="Ver todos los módulos"
       />
@@ -290,15 +249,6 @@ const areas = [
           </div>
         )
       }
-
-      {
-        counts.demo > 0 && (
-          <p class="legend-line">
-            <span>Las tarjetas DEMO existen para validar el diseño del archivo.</span>
-            <a class="link" href={withBase('/labs/#estado')}>Leer el estado del archivo</a>
-          </p>
-        )
-      }
     </div>
   </section>
 
@@ -330,7 +280,7 @@ const areas = [
             </div>
             <div class="formation-stat">
               <strong>{String(courseModules.length).padStart(2, '0')}</strong>
-              <span>Módulos del recorrido</span>
+              <span>Módulos documentados</span>
             </div>
             <div class="formation-stat">
               <strong>{String(counts.published).padStart(2, '0')}</strong>
@@ -339,8 +289,8 @@ const areas = [
           </div>
 
           <div class="formation-foot">
-            <span>02–03: publicados · 04–08: pendientes</span>
-            <a class="link" href={withBase('/labs/#estado')}>Estado del archivo</a>
+            <span>Módulos 02–03 publicados</span>
+            <a class="link" href={withBase('/labs/')}>Ver SOC Labs</a>
           </div>
         </div>
 

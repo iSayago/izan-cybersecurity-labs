@@ -1,35 +1,19 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LabCard from '../../components/LabCard.astro';
-import StatusBadge from '../../components/StatusBadge.astro';
 import Icon from '../../components/Icon.astro';
 import { modules, documentationLabels } from '../../data/modules';
 import { site } from '../../data/site';
-import {
-  countByStatus,
-  formatDate,
-  getLabs,
-  labModuleGroups,
-  statusMeta,
-  unique,
-} from '../../lib/content';
+import { countByStatus, formatDate, getLabs, labModuleGroups, unique } from '../../lib/content';
 import { withBase } from '../../lib/url';
 
 const labs = await getLabs();
 const counts = countByStatus(labs);
-const groups = labModuleGroups(labs).map((group) => ({
-  ...group,
-  published: group.labs.filter((entry) => entry.data.status === 'published').length,
-  demo: group.labs.filter((entry) => entry.data.status === 'demo').length,
-  pending: group.labs.filter((entry) => entry.data.status === 'pending').length,
-}));
+const groups = labModuleGroups(labs);
 const categories = unique(labs.flatMap((entry) => entry.data.categories)).sort((a, b) =>
   a.localeCompare(b, 'es'),
 );
-const modulesWithContent = modules.filter((module) => module.id !== '01').length;
-const statusOrder = ['published', 'demo', 'pending'] as const;
-const pendingLabel =
-  counts.pending === 1 ? '1 plantilla pendiente' : `${counts.pending} plantillas pendientes`;
+const modulesWithContent = modules.length;
 ---
 
 <BaseLayout
@@ -39,18 +23,18 @@ const pendingLabel =
 >
   <header class="page-head">
     <div class="wrap">
-      <p class="eyebrow">SOC Labs / Archivo 02–08</p>
+      <p class="eyebrow">SOC Labs / Archivo</p>
       <h1 class="page-title">El laboratorio,<br /><em>por módulos.</em></h1>
       <p class="page-lede">
         Prácticas del programa SOC Analyst (CSA) de EC-Council. Cada módulo conserva
-        su título original y cada informe declara su estado. Completar una práctica
-        no significa que su documentación esté publicada.
+        su título original y cada informe incluye objetivo, procedimiento, evidencia
+        y análisis de resultados.
       </p>
 
       <div class="stat-row">
         <div class="stat">
           <strong>{String(modulesWithContent).padStart(2, '0')}</strong>
-          <span>Módulos del recorrido</span>
+          <span>Módulos documentados</span>
         </div>
         <div class="stat">
           <strong>{String(site.course.labsCompleted).padStart(2, '0')}</strong>
@@ -60,51 +44,15 @@ const pendingLabel =
           <strong>{String(counts.published).padStart(2, '0')}</strong>
           <span>Informes publicados</span>
         </div>
-        <div class="stat">
-          <strong>{String(counts.demo).padStart(2, '0')}</strong>
-          <span>Demos de formato</span>
-        </div>
       </div>
 
       <p class="page-meta">
         <span>Última entrada: {formatDate(labs[0]?.data.date)}</span>
-        <span>{modulesWithContent} módulos del recorrido</span>
-        <span>Contenido DEMO señalado</span>
+        <span>{modulesWithContent} módulos documentados</span>
+        <span>Registro audiovisual en cada práctica</span>
       </p>
     </div>
   </header>
-
-  <section class="status-section" id="estado" aria-labelledby="status-title">
-    <div class="wrap">
-      <div class="status-panel">
-        <div class="status-intro">
-          <p class="micro-label">Estado del archivo</p>
-          <h2 id="status-title">Progreso del curso ≠ informe publicado.</h2>
-          <p>
-            Los estados describen la web, no el avance del programa. Una práctica
-            realizada puede seguir en preparación; una demostración existe solo para
-            validar el formato y no se atribuye a ninguna actividad real.
-          </p>
-          <p class="status-fact">
-            <span class="status-dot" aria-hidden="true"></span>
-            {site.course.labsCompleted} prácticas realizadas · {counts.published} informes publicados ·
-            {counts.demo} demos · {pendingLabel}
-          </p>
-        </div>
-
-        <dl class="status-grid">
-          {
-            statusOrder.map((status) => (
-              <div class="status-row">
-                <dt><StatusBadge status={status} /></dt>
-                <dd>{statusMeta[status].description}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </div>
-    </div>
-  </section>
 
   <div class="filter-shell" id="filtros">
     <div class="wrap">
@@ -156,7 +104,7 @@ const pendingLabel =
         </div>
       </form>
       <p class="filter-count" id="lab-count" aria-live="polite">
-        {counts.total} registros de práctica · agrupados por módulo · DEMO incluido
+        {counts.total} prácticas · agrupadas por módulo
       </p>
     </div>
   </div>
@@ -167,7 +115,7 @@ const pendingLabel =
         modules.map((module) => (
           <a href={`#${module.slug}`}>
             <b>{module.id}</b>
-            <span>{module.documentation === 'pending-title' ? 'Título pendiente' : module.label}</span>
+            <span>{module.label}</span>
           </a>
         ))
       }
@@ -177,7 +125,7 @@ const pendingLabel =
   <div class="wrap">
     <div id="lab-archive">
       {
-        groups.map(({ module, labs: entries, published, demo, pending }) => (
+        groups.map(({ module, labs: entries }) => (
           <section
             class="module-block"
             id={module.slug}
@@ -188,7 +136,7 @@ const pendingLabel =
             <div class="module-head">
               <div class="module-number">
                 <strong>{module.id}</strong>
-                <span>/ 08</span>
+                <span>/ CSA</span>
               </div>
 
               <div>
@@ -200,7 +148,7 @@ const pendingLabel =
                 <div class="module-meta">
                   <span class="badge badge-module">{documentationLabels[module.documentation]}</span>
                   <span class="module-count">
-                    <b>{published}</b> publicadas · <b>{demo}</b> demo · <b>{pending}</b> pendientes
+                    <b>{entries.length}</b> práctica{entries.length === 1 ? '' : 's'}
                   </span>
                 </div>
               </div>
@@ -215,38 +163,9 @@ const pendingLabel =
               </div>
             </div>
 
-            {entries.length > 0 ? (
-              <div class:list={['lab-grid', entries.length === 1 && 'lab-grid-sparse']}>
-                {entries.map((entry) => <LabCard entry={entry} />)}
-                {entries.length === 1 && (
-                  <div class="slot-card">
-                    <span class="badge badge-pending badge-no-dot">Siguiente registro</span>
-                    <p class="slot-title">Espacio reservado</p>
-                    <p class="slot-copy">
-                      El siguiente informe del módulo se publicará aquí cuando su
-                      documentación esté revisada.
-                    </p>
-                    <a class="link-arrow" href={withBase('/about/#method-title')}>
-                      Cómo se documenta <Icon name="arrow-up-right" size={12} />
-                    </a>
-                    <span class="slot-note">Sin contenido ficticio</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div class="module-empty">
-                <span>
-                  {module.documentation === 'pending-title'
-                    ? 'No se ha inventado un título ni se han publicado prácticas de este módulo.'
-                    : 'Todavía no hay prácticas publicadas en este módulo.'}
-                </span>
-                {module.documentation === 'pending-title' ? (
-                  <a href={withBase('/about/#formacion')}>Ver formación</a>
-                ) : (
-                  <span class="micro-label">Sin registros</span>
-                )}
-              </div>
-            )}
+            <div class="lab-grid">
+              {entries.map((entry) => <LabCard entry={entry} />)}
+            </div>
           </section>
         ))
       }
@@ -257,23 +176,15 @@ const pendingLabel =
       <p>Prueba con otro módulo, otra categoría o limpia la búsqueda.</p>
       <button class="btn btn-ghost mt-5" type="reset" form="lab-filter-form">Limpiar filtros</button>
     </div>
-
-    <p class="legend-line">
-      <StatusBadge status="demo" />
-      <span>
-        Las tarjetas DEMO muestran el diseño del archivo. No representan prácticas
-        realizadas ni resultados obtenidos.
-      </span>
-    </p>
   </div>
 
   <div class="wrap">
     <section class="lab-footer-note" aria-label="Sobre esta sección">
       <p class="micro-label">Nota de alcance</p>
       <p>
-        Los módulos se listan con sus títulos originales. El módulo 01 aparece sin
-        título porque está pendiente de confirmación. Las prácticas que todavía no
-        existen no se rellenan con contenido ficticio.
+        Solo se publican prácticas completas, con su informe, sus evidencias y su
+        registro audiovisual. Los módulos se listan con los títulos originales del
+        programa.
       </p>
       <a class="link-arrow" href={withBase('/about/')}>
         Método de documentación <Icon name="arrow-up-right" size={12} />
@@ -283,77 +194,6 @@ const pendingLabel =
 </BaseLayout>
 
 <style>
-  .status-section {
-    border-bottom: 1px solid var(--color-line);
-    padding-block: clamp(2rem, 4vw, 3rem);
-  }
-
-  .status-panel {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    border: 1px solid var(--color-line);
-    background:
-      radial-gradient(circle at 100% 0%, rgba(86, 220, 232, 0.055), transparent 40%),
-      rgba(11, 19, 29, 0.55);
-    padding: clamp(1.25rem, 3vw, 2rem);
-  }
-
-  .status-intro h2 {
-    max-width: 28ch;
-    margin-top: 0.55rem;
-    font-size: clamp(1.4rem, 2.8vw, 2.1rem);
-    font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    color: var(--color-ink);
-  }
-
-  .status-intro > p {
-    max-width: 62ch;
-    margin-top: 0.7rem;
-    font-size: 0.88rem;
-    line-height: 1.7;
-    color: var(--color-muted);
-  }
-
-  .status-fact {
-    display: block;
-    margin-top: 0.8rem;
-    font-family: var(--font-mono) !important;
-    font-size: 0.56rem !important;
-    line-height: 1.8;
-    letter-spacing: 0.04em;
-    color: var(--color-soft) !important;
-  }
-
-  .status-fact .status-dot {
-    display: inline-block;
-    margin-right: 0.5rem;
-    vertical-align: middle;
-  }
-
-  .status-grid {
-    display: grid;
-    gap: 0.75rem;
-    align-content: start;
-  }
-
-  .status-row {
-    display: grid;
-    grid-template-columns: 7.5rem 1fr;
-    gap: 0.8rem;
-    align-items: start;
-    padding-top: 0.65rem;
-    border-top: 1px solid var(--color-line);
-  }
-
-  .status-row dd {
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: var(--color-muted);
-  }
-
   .lab-footer-note {
     display: grid;
     gap: 0.6rem;
@@ -371,20 +211,5 @@ const pendingLabel =
 
   .lab-footer-note .link-arrow {
     margin-top: 0.2rem;
-  }
-
-  @media (min-width: 880px) {
-    .status-panel {
-      grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
-      gap: 4rem;
-      align-items: center;
-    }
-  }
-
-  @media (max-width: 560px) {
-    .status-row {
-      grid-template-columns: 1fr;
-      gap: 0.35rem;
-    }
   }
 </style>

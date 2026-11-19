@@ -1,7 +1,7 @@
 ---
 interface Props {
   title?: string;
-  variant?: 'note' | 'warning' | 'demo' | 'quote';
+  variant?: 'note' | 'warning' | 'quote';
 }
 
 const { title, variant = 'note' } = Astro.props;
@@ -11,7 +11,6 @@ const { title, variant = 'note' } = Astro.props;
   class:list={[
     'callout',
     variant === 'warning' && 'callout-warning',
-    variant === 'demo' && 'callout-demo',
     variant === 'quote' && 'callout-quote',
   ]}
 >
@@ -25,13 +24,6 @@ const { title, variant = 'note' } = Astro.props;
     background: rgba(239, 183, 122, 0.045);
   }
   .callout-warning :global(strong) {
-    color: var(--color-amber);
-  }
-  .callout-demo {
-    border-left-color: var(--color-amber);
-    background: rgba(239, 183, 122, 0.045);
-  }
-  .callout-demo :global(strong) {
     color: var(--color-amber);
   }
   .callout-quote {

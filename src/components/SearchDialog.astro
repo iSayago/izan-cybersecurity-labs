@@ -12,12 +12,12 @@ import Icon from './Icon.astro';
   <div class="search-head">
     <Icon name="search" size={17} />
     <h2 id="search-dialog-title" class="sr-only">Buscar en el archivo</h2>
-    <label for="search-input" class="sr-only">Buscar prácticas, writeups y etiquetas</label>
+    <label for="search-input" class="sr-only">Buscar prácticas y etiquetas</label>
     <input
       id="search-input"
       class="search-input"
       type="search"
-      placeholder="Buscar prácticas, writeups, etiquetas…"
+      placeholder="Buscar prácticas, etiquetas…"
       autocomplete="off"
       spellcheck="false"
       role="combobox"
@@ -43,11 +43,11 @@ import Icon from './Icon.astro';
     role="listbox"
     aria-label="Resultados de búsqueda"
   >
-    <p class="search-empty">Escribe para buscar en laboratorios y publicaciones.</p>
+    <p class="search-empty">Escribe para buscar en las prácticas.</p>
   </div>
 
   <div class="search-foot">
-    <span data-search-count aria-live="polite">— resultados</span>
-    <span>SOC LABS / WRITEUPS / AI SECURITY</span>
+    <span data-search-count aria-live="polite">0 resultados</span>
+    <span>SOC LABS / PRÁCTICAS</span>
   </div>
 </dialog>

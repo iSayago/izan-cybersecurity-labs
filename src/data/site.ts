@@ -37,8 +37,6 @@ export const site = {
   },
   nav: [
     { label: 'SOC Labs', href: '/labs/' },
-    { label: 'Writeups', href: '/blog/' },
-    { label: 'AI Security', href: '/ai-security/' },
     { label: 'About', href: '/about/' },
   ],
   social: {

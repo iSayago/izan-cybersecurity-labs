@@ -43,6 +43,37 @@ Características:
   redactada.
 - Los textos de los resúmenes describen resultados observados, no resultados inventados.
 
+## Revisión de edición (v2)
+
+La versión publicada en `e54049b` sustituye a la primera edición. Se revisaron las
+grabaciones originales y se conservaron únicamente los tramos con ejecuciones correctas:
+sin comandos fallidos, sin repeticiones y sin esperas largas. Las copias anteriores están
+en `media-work/videos/backup-v1/`.
+
+| Práctica | Duración editada |
+| --- | --- |
+| Lab 1 · 01 SQL Injection | 1:12 |
+| Lab 1 · 02 XSS | 0:16 |
+| Lab 1 · 03 Nmap | 1:00 |
+| Lab 1 · 04 DoS UDP | 0:53 |
+| Lab 1 · 05 Hydra FTP | 0:47 |
+| Lab 1 · 06 Wireshark | 3:05 |
+| Lab 2 · 01 Windows Logs | 1:36 |
+| Lab 2 · 02 IIS Logs | 1:35 |
+| Lab 2 · 03 Snort | 1:41 |
+| Lab 2 · 04 Splunk | 3:16 |
+
+Criterios aplicados:
+
+- Los tramos con errores de ruta, comandos fallidos o reintentos se han descartado.
+- En Hydra, el terminal se muestra con un recorte que excluye el historial de intentos
+  fallidos y la línea con la contraseña; la credencial solo aparece redactada en la
+  evidencia del informe.
+- Las capturas propias de la práctica que se abrían durante la grabación se insertan como
+  **evidencia** (`EVIDENCIA / CAPTURA DE LA PRÁCTICA`), no como recreaciones.
+- Los resúmenes verticales se regeneraron con los mismos tramos limpios.
+- No se ha añadido voz, música ni resultados que no existan en la fuente.
+
 ## Actualización de URLs
 
 La base pública es:
