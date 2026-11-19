@@ -23,13 +23,13 @@ const shouldRender = Boolean(original || summary || showPending);
   <div class="video-pair">
     <figure class="video-card">
       <div class="video-card-head">
-        <span><b>Grabación original</b></span>
-        <span>16:9 · práctica completa</span>
+        <span><b>Grabación de la práctica</b></span>
+        <span>16:9 · versión editada</span>
       </div>
       <div class="video-frame">
         {
           original ? (
-            <VideoEmbed video={original} fallbackLabel="Grabación original de la práctica" />
+            <VideoEmbed video={original} fallbackLabel="Grabación editada de la práctica" />
           ) : (
             <div class="video-empty">
               <Icon name="video" size={24} />
@@ -40,7 +40,7 @@ const shouldRender = Boolean(original || summary || showPending);
         }
       </div>
       <figcaption class="video-caption">
-        <b>Registro completo.</b> Vídeo alojado externamente; el repositorio no almacena archivos pesados.
+        <b>Registro editado.</b> Vídeo alojado externamente; el repositorio no almacena archivos pesados.
       </figcaption>
     </figure>
 
