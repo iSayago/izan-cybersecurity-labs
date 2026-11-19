@@ -11,7 +11,9 @@ import { withBase } from '../lib/url';
 
 const labs = await getLabs();
 const counts = countByStatus(labs);
-const latest = labs.slice(0, 4);
+const latest = [...labs]
+  .sort((a, b) => a.data.module.localeCompare(b.data.module) || a.data.practice - b.data.practice)
+  .slice(0, 4);
 const courseModules = modules;
 
 const ordered = [...labs].sort(
@@ -173,8 +175,8 @@ const areas = [
       <SectionHead
         index="01"
         id="latest-title"
-        title="Últimas prácticas"
-        description="Informes publicados con objetivo, procedimiento, evidencias y análisis."
+        title="Prácticas publicadas"
+        description="Los informes publicados, ordenados por módulo y práctica."
         link={withBase('/labs/')}
         linkLabel="Abrir SOC Labs"
       />
