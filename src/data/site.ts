@@ -32,8 +32,8 @@ export const site = {
     program: 'SOC Analyst (CSA)',
     issuer: 'EC-Council',
     status: 'Formación en curso',
-    labsCompleted: 3,
-    note: 'Tres prácticas realizadas. La publicación de cada informe se gestiona por separado del progreso del curso.',
+    labsCompleted: 10,
+    note: 'Diez ejercicios documentados en los Laboratorios 1 y 2. La publicación de cada informe se gestiona por separado del progreso del curso.',
   },
   nav: [
     { label: 'SOC Labs', href: '/labs/' },

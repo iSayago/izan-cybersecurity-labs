@@ -30,3 +30,9 @@ content/**/*.mov
 .shots/
 build-*.log
 
+
+# local media tooling environment
+.venv-media/
+
+# source recordings and working media (never commit heavy files)
+media-work/

@@ -1,0 +1,111 @@
+---
+title: "Laboratorio 1 · SQL Injection en LuxuryTreats"
+description: "Análisis de una inyección SQL sobre el parámetro id de OrderDetail.aspx y de la exposición de pedidos que genera en la aplicación de laboratorio."
+module: "02"
+practice: 1
+date: 2026-10-28
+updated: 2026-11-19
+categories:
+  - "Threat Analysis"
+  - "Web Security"
+tags:
+  - "SQL Injection"
+  - "OWASP"
+  - "IIS"
+  - "IoCs"
+  - "LuxuryTreats"
+tools:
+  - "Firefox"
+  - "LuxuryTreats (ASP.NET)"
+  - "EC-Council Practice Labs"
+status: published
+featured: true
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical están preparados; su alojamiento externo se añadirá cuando esté disponible.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Comprobar cómo un parámetro de URL sin validación permite alterar la consulta SQL que construye la aplicación y recuperar pedidos que no pertenecen al usuario autenticado. El ejercicio forma parte del bloque de amenazas, IoCs y metodología de ataque del programa CSA.
+
+## Contexto y entorno del laboratorio
+
+El escenario es una aplicación web ASP.NET de laboratorio, **LuxuryTreats**, publicada en la máquina `10.10.10.12` y accesible desde la máquina atacante Ubuntu mediante Firefox. La sesión se inicia con un usuario de prueba (`bob`) y la aplicación muestra el pedido `ORD-001`. El objetivo es observar si el identificador del pedido se usa directamente en la consulta.
+
+No se ha creado ni modificado la aplicación: es el entorno proporcionado por el curso. La grabación no muestra la base de datos ni el código fuente; por tanto, la explicación de la consulta es una interpretación del comportamiento observado.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Firefox | Navegación y manipulación del parámetro de la URL |
+| LuxuryTreats | Aplicación web ASP.NET del laboratorio |
+| EC-Council Practice Labs | Entorno virtual aislado de la práctica |
+
+## Procedimiento realizado
+
+1. Se inicia sesión en la aplicación con el usuario de laboratorio y se abre el detalle del pedido `ORD-001`.
+2. Se observa la URL `http://www.luxurytreats.com/OrderDetail.aspx?id=ORD-001`.
+3. Se modifica el valor de `id` añadiendo una condición SQL: `ORD-001' or 1=1;--`.
+4. La aplicación devuelve el detalle del pedido y, además, una tabla con referencias de otros pedidos.
+
+```text
+http://www.luxurytreats.com/OrderDetail.aspx?id=ORD-001' or 1=1;--
+```
+
+La condición `1=1` es siempre verdadera y el comentario `--` elimina el resto de la consulta original. El resultado observado es que la página deja de mostrar un único pedido y presenta un conjunto más amplio de registros.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-02/practice-01/lab1-sql-baseline.webp",
+    "alt": "Detalle del pedido ORD-001 antes de la inyección",
+    "caption": "Punto de partida: el usuario bob consulta su pedido ORD-001."
+  },
+  {
+    "src": "/images/labs/module-02/practice-01/lab1-sql-result.webp",
+    "alt": "Tabla de pedidos expuesta después de la inyección SQL",
+    "caption": "La página muestra varios pedidos y el texto de la condición inyectada."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+| Evidencia | Momento | Qué demuestra |
+| --- | --- | --- |
+| `lab1-sql-baseline.webp` | 00:05:30 | Consulta legítima de un pedido concreto |
+| `lab1-sql-result.webp` | 00:09:30 | Cambio de comportamiento tras manipular el parámetro `id` |
+
+## Análisis de resultados
+
+**Observado:** al añadir `' or 1=1;--` al parámetro, la aplicación devuelve más pedidos de los que corresponden a la consulta inicial y muestra la condición en el texto de la página. La respuesta ya no está limitada al pedido solicitado.
+
+**Interpretación:** el parámetro se está concatenando en una consulta SQL sin parametrización. La tautología `1=1` amplía el conjunto de resultados y el comentario `--` anula el resto de la condición. No se observa un error de base de datos ni se extraen credenciales; el impacto visible es exposición de datos de pedidos.
+
+El IoC más directo es la presencia de metacaracteres SQL (`'`, `--`, `1=1`) en el parámetro de la URL. En un SOC, ese patrón debe revisarse junto con el código de estado HTTP, la IP de origen y el usuario autenticado en los logs del servidor web. El Laboratorio 2 permite comprobar precisamente cómo queda registrada esta misma cadena en los logs de IIS.
+
+## Conclusiones
+
+La práctica demuestra que la validación de entrada no es suficiente por sí sola: la consulta debe construirse con parámetros y el servidor debe aplicar autorización sobre cada registro. La evidencia también recuerda que el análisis de una inyección no termina en la página: el valor viaja al servidor y queda en sus logs.
+
+## Aprendizajes
+
+- La parametrización de consultas y la autorización por registro son controles complementarios.
+- Un parámetro manipulado deja rastro en la URL y en el servidor web; la evidencia debe conservarse con su contexto.
+
+## Referencias
+
+- OWASP — [SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection).
+- MITRE ATT&CK — [Exploit Public-Facing Application (T1190)](https://attack.mitre.org/techniques/T1190/).
+- EC-Council — [Certified SOC Analyst (CSA)](https://www.eccouncil.org/train-certify/certified-soc-analyst-csa/).

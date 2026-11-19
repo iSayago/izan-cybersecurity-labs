@@ -1,0 +1,112 @@
+---
+title: "Laboratorio 2 · Detección con Snort IDS"
+description: "Instalación y configuración de Snort 2.9.20, definición de firmas para escaneos Nmap y validación de alertas en alert.ids."
+module: "03"
+practice: 3
+date: 2026-10-30
+updated: 2026-11-19
+categories:
+  - "Log Management"
+  - "Network Security"
+tags:
+  - "Snort"
+  - "IDS"
+  - "Nmap"
+  - "Alert Logs"
+  - "Network Scanning"
+tools:
+  - "Snort 2.9.20"
+  - "Npcap 1.80"
+  - "Notepad++"
+  - "Nmap 7.92"
+  - "Windows Server 2022"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical están preparados; su alojamiento externo se añadirá cuando esté disponible.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Configurar Snort como IDS en Windows Server, añadir firmas para detectar escaneos Nmap y comprobar que las alertas se escriben en el archivo `alert.ids`.
+
+## Contexto y entorno del laboratorio
+
+Snort se instala en la máquina `WebServer2022` (IP `10.10.10.12`) y se ejecuta en la interfaz del servidor. La máquina atacante Ubuntu ejecuta Nmap contra esa IP. El tráfico permanece en la red aislada del curso. La configuración se basa en el archivo `snort.conf` y las reglas proporcionadas por el laboratorio.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Snort 2.9.20 | IDS y generación de alertas |
+| Npcap 1.80 | Captura de paquetes en Windows |
+| Notepad++ | Edición de `snort.conf`, reglas y clasificaciones |
+| Nmap 7.92 | Generación de tráfico de scanning |
+| Windows Server 2022 | Sensor IDS del laboratorio |
+
+## Procedimiento realizado
+
+1. Se instala Snort 2.9.20 y Npcap 1.80; se copian `snort.conf`, `so_rules`, `preproc_rules` y `rules` a `C:\Snort`.
+2. Se valida la instalación con `snort -W` para localizar el índice de la interfaz. En el entorno aparece el índice `4`.
+3. Se edita `snort.conf` para definir `HOME_NET 10.10.10.12/24`, las rutas de reglas y el directorio de logs:
+
+```text
+var HOME_NET 10.10.10.12/24
+config logdir: c:\Snort\log
+output alert_fast: alert.ids
+```
+
+4. Se añaden clasificaciones para `TCP-Scan`, `Xmas-Scan` y `FIN-Scan`, y reglas para detectar los escaneos Nmap.
+5. Se inicia Snort en modo consola:
+
+```bash
+snort -i4 -A console -c C:\Snort\etc\snort.conf -l C:\Snort\log -A full
+```
+
+6. Desde la máquina atacante se ejecutan escaneos Nmap (`-sS`, `-sT`, `-sN`, `-sX`, `-sF`, entre otros).
+7. Se detiene Snort, se abre `C:\Snort\loglert.ids` con Notepad++ y se revisan las alertas.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-03/practice-03/lab2-snort-alertids.webp",
+    "alt": "Alertas Nmap TCP Scan en alert.ids",
+    "caption": "Snort registra alertas de Nmap TCP Scan desde 10.10.10.56 hacia 10.10.10.12."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+## Análisis de resultados
+
+**Observado:** `alert.ids` contiene entradas con el mensaje `Nmap TCP Scan`, clasificación `TCP Scan Attempted`, prioridad 1, origen `10.10.10.56` y destino `10.10.10.12`. Los puertos de destino varían y el archivo crece con cada intento.
+
+**Interpretación:** la firma detecta el patrón de scanning que el laboratorio quiere identificar. La alerta incluye suficiente contexto para pivotar: IP de origen, IP de destino, puerto y flags. Sin embargo, una firma de escaneo puede generar ruido si no se ajusta a la red; la validación debe incluir falsos positivos y una revisión del umbral.
+
+La práctica muestra la diferencia entre "tener un IDS" y "tener una regla útil": la instalación no es el objetivo; el objetivo es que la alerta esté escrita, sea legible y permita una investigación.
+
+## Conclusiones
+
+Snort aporta detección de red basada en firmas, pero necesita configuración, reglas y revisión. La evidencia `alert.ids` es un log técnico que después puede centralizarse en un SIEM; el Laboratorio 2 lo utiliza en la práctica de Splunk. La lección es validar cada firma con tráfico controlado antes de confiar en ella.
+
+## Aprendizajes
+
+- Una firma de IDS debe validarse con tráfico controlado y revisarse por falsos positivos.
+- La alerta útil incluye origen, destino, puerto, clasificación y una secuencia temporal.
+
+## Referencias
+
+- Snort — [Documentation](https://www.snort.org/documents).
+- Nmap — [Port Scanning Techniques](https://nmap.org/book/man-port-scanning-techniques.html).
+- MITRE ATT&CK — [Network Service Discovery (T1046)](https://attack.mitre.org/techniques/T1046/).

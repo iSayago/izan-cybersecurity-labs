@@ -1,0 +1,117 @@
+---
+title: "Laboratorio 2 · Logging y análisis de IIS"
+description: "Configuración de campos de log en IIS y localización de una petición SQL Injection en los registros del sitio LuxuryTreats."
+module: "03"
+practice: 2
+date: 2026-10-30
+updated: 2026-11-19
+categories:
+  - "Log Management"
+  - "Web Logs"
+tags:
+  - "IIS"
+  - "W3C Logs"
+  - "SQL Injection"
+  - "Web Server Logs"
+  - "Forensics"
+tools:
+  - "IIS Manager"
+  - "Notepad++"
+  - "Firefox"
+  - "LuxuryTreats (ASP.NET)"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical están preparados; su alojamiento externo se añadirá cuando esté disponible.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Comprobar qué información registra IIS sobre una petición web y localizar en el log la cadena de una inyección SQL realizada contra LuxuryTreats.
+
+## Contexto y entorno del laboratorio
+
+El sitio LuxuryTreats está alojado en IIS sobre la máquina `WebServer2022`. La práctica configura el registro W3C del sitio, selecciona campos útiles para el análisis y revisa el archivo generado en la carpeta de logs. La petición se genera desde la máquina atacante Ubuntu mediante Firefox.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| IIS Manager | Configuración del logging y de los campos W3C |
+| Notepad++ | Apertura y búsqueda en el archivo de log |
+| Firefox | Generación de la petición SQLi desde la máquina atacante |
+| LuxuryTreats | Aplicación web de laboratorio |
+
+## Procedimiento realizado
+
+1. En **IIS Manager** se abre el sitio **LuxuryTreats** y se entra en **Logging**.
+2. Se confirma que el formato es **W3C** y se revisa la carpeta de destino:
+
+```text
+C:\inetpub\logs\LogFiles\W3SVC2
+```
+
+3. En **Select Fields** se añaden campos útiles: `c-ip`, `cs-username`, `sc-status`, `sc-substatus`, `sc-bytes`, `cs-bytes`, `cs-host`, `cs(User-Agent)`, `cs(Cookie)` y `cs(Referer)`.
+4. Se aplica la configuración y se genera una petición SQLi contra `OrderDetail.aspx`.
+5. Se abre el archivo `u_ex...log` con Notepad++ y se busca la cadena `1=1;--`.
+6. Se identifica la línea que contiene el parámetro manipulado y se leen sus campos.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-03/practice-02/lab2-iis-fields.webp",
+    "alt": "Configuración del logging de LuxuryTreats en IIS",
+    "caption": "Ruta de logs y configuración W3C del sitio LuxuryTreats."
+  },
+  {
+    "src": "/images/labs/module-03/practice-02/lab2-iis-sqli-log.webp",
+    "alt": "Petición SQLi registrada en el log de IIS",
+    "caption": "El campo cs-uri-query conserva la cadena Id=ORD-001%27or1=1;--."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+| Campo | Valor observado |
+| --- | --- |
+| `cs-method` | GET / POST |
+| `cs-uri-stem` | `/OrderDetail.aspx` |
+| `cs-uri-query` | `Id=ORD-001%27or1=1;--` |
+| `c-ip` | `10.10.10.56` |
+| `cs-username` | `bob` |
+| `sc-status` | `500` |
+| `sourcetype` | `iis` |
+
+## Análisis de resultados
+
+**Observado:** el archivo de IIS contiene la petición con el parámetro `Id=ORD-001%27or1=1;--`, el usuario `bob`, la IP de la máquina atacante y un estado HTTP 500. La aplicación devolvió un error en esa solicitud, pero el intento quedó registrado.
+
+**Interpretación:** el log web conserva la entrada completa y permite reconstruir qué se envió, desde dónde y con qué identidad. La codificación URL (`%27` por `'`) no oculta el patrón; el analista debe decodificarla. El estado 500 puede ser una señal de error de aplicación, no la prueba de que la inyección tuviera éxito.
+
+Este ejercicio conecta con la práctica de SQL Injection: la misma cadena que se veía en la URL aparece en el servidor. La diferencia es que ahora hay una fuente persistente y centralizable para detección y correlación.
+
+## Conclusiones
+
+Los logs de IIS son útiles si se seleccionan campos suficientes. Un log por defecto puede decir poco; añadir usuario, host, agente y query permite investigar. La lección es revisar la codificación, no confiar en el código de estado como única señal y conservar el contexto de la petición.
+
+## Aprendizajes
+
+- Los campos seleccionados determinan la utilidad futura del log; conviene configurarlos antes de necesitarlos.
+- La query codificada debe decodificarse y revisarse junto con el estado HTTP y la identidad.
+
+## Referencias
+
+- Microsoft Learn — [IIS Logging](https://learn.microsoft.com/en-us/iis/configuration/system.applicationHost/sites/site/logFile).
+- OWASP — [SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection).
+- MITRE ATT&CK — [Exploit Public-Facing Application (T1190)](https://attack.mitre.org/techniques/T1190/).

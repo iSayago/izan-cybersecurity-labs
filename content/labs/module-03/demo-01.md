@@ -11,7 +11,7 @@ tags:
   - Normalization
   - Data model
 tools: []
-status: demo
+status: draft
 featured: false
 ---
 

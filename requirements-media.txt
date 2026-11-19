@@ -1,0 +1,9 @@
+faster-whisper==1.2.1
+av==15.0.0
+opencv-python==5.1.0.95
+pillow==11.3.0
+moviepy==2.2.1
+numpy==2.5.5
+imageio==2.38.2
+imageio-ffmpeg==0.8.1
+soundfile==0.14.0

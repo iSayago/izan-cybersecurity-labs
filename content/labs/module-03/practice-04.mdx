@@ -1,0 +1,132 @@
+---
+title: "Laboratorio 2 · Centralización de logs con Splunk"
+description: "Instalación de Splunk Universal Forwarder y Splunk Enterprise, envío de logs de Windows, IIS y Snort al indexador y búsqueda centralizada."
+module: "03"
+practice: 4
+date: 2026-11-05
+updated: 2026-11-19
+categories:
+  - "Log Management"
+  - "SIEM"
+tags:
+  - "Splunk"
+  - "Universal Forwarder"
+  - "SIEM"
+  - "Centralized Logging"
+  - "Windows Event Logs"
+tools:
+  - "Splunk Universal Forwarder 9.2.2"
+  - "Splunk Enterprise 9.2.2"
+  - "Windows Server 2022"
+  - "Windows 11"
+  - "IIS"
+  - "Snort"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical están preparados; su alojamiento externo se añadirá cuando esté disponible.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Construir un flujo de logging centralizado: recoger eventos de Windows, logs de IIS y alertas de Snort en varios equipos, enviarlos a un indexador Splunk y verificarlos mediante búsquedas desde una única consola.
+
+## Contexto y entorno del laboratorio
+
+El laboratorio contiene tres equipos relevantes: **WebServer2022** (IIS y Snort), **User Machine-Windows** (Windows 11) y **Analyst Machine 1** (Splunk Enterprise, `10.10.10.16`). Los forwarders se instalan en los dos primeros y envían datos al indexador por el puerto `9997`. La práctica continúa la configuración de logs de los ejercicios anteriores.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Splunk Universal Forwarder 9.2.2 | Recolección y envío de logs desde WebServer2022 y Windows 11 |
+| Splunk Enterprise 9.2.2 | Indexador y consola de búsqueda en Analyst Machine 1 |
+| Windows Event Logs | Fuente de eventos de seguridad |
+| IIS | Fuente de logs web |
+| Snort | Fuente de alertas IDS |
+
+## Procedimiento realizado
+
+1. Se instala Splunk Universal Forwarder en **WebServer2022** y se configura el indexador remoto `10.10.10.16:9997`.
+2. Se seleccionan los logs de eventos de Windows durante la instalación.
+3. Se repite la instalación en **User Machine-Windows** con el mismo destino.
+4. En WebServer2022 se añaden entradas para los logs de IIS y de Snort, y se ajustan los campos de IIS.
+5. Se reinicia el servicio `SplunkForwarder` para aplicar la configuración.
+6. En **Analyst Machine 1** se instala Splunk Enterprise, se habilita la recepción en el puerto `9997` y se activa la aplicación SplunkForwarder.
+7. Se valida el flujo con búsquedas por host y por tipo de fuente.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-03/practice-04/lab2-splunk-snort.webp",
+    "alt": "Eventos de Snort centralizados en Splunk",
+    "caption": "Búsqueda host=WEBSERVER2022: eventos snort_ids con Nmap TCP Scan."
+  },
+  {
+    "src": "/images/labs/module-03/practice-04/lab2-splunk-windows4625.webp",
+    "alt": "Eventos 4625 centralizados en Splunk",
+    "caption": "Búsqueda de EventCode 4625 con Sub_Status y Status de fallo de autenticación."
+  },
+  {
+    "src": "/images/labs/module-03/practice-04/lab2-splunk-iis.webp",
+    "alt": "Evento IIS con la inyección SQL en Splunk",
+    "caption": "El campo cs_uri_query conserva la cadena de SQL Injection."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+## Búsquedas y resultados observados
+
+```text
+host=WEBSERVER2022
+```
+
+Devuelve eventos de `snort_ids` procedentes de WebServer2022, incluidos los mensajes `Nmap TCP Scan`.
+
+```text
+host=WEBSERVER2022 sourcetype="WinEventLog:Security" EventCode=4625 Sub_Status=0xC0000064 Status=0xC000006D
+```
+
+Devuelve **24 eventos** de fallo de autenticación con los campos de estado correspondientes.
+
+```text
+host=WEBSERVER2022 sourcetype=iis
+```
+
+Permite localizar el evento IIS cuyo `cs_uri_query` contiene `Id=ORD-001%27or1=1;--`, con el `source` del archivo de log y el `sourcetype` `iis`.
+
+## Análisis de resultados
+
+**Observado:** las tres fuentes llegan al indexador y pueden consultarse desde la misma interfaz. Los eventos conservan `host`, `source` y `sourcetype`, lo que permite reconstruir el origen. Las búsquedas devuelven eventos de Snort, de seguridad de Windows y de IIS.
+
+**Interpretación:** la centralización resuelve el problema de tener que abrir tres consolas distintas. También crea un punto único de correlación: un mismo host puede relacionar un escaneo detectado por Snort con un fallo de autenticación y una petición web anómala. La calidad depende de la hora, del parseo de campos y de que las fuentes estén correctamente etiquetadas.
+
+La práctica no convierte automáticamente los logs en detecciones; el valor está en la consulta y en la interpretación. Un SIEM sin modelos de datos ni revisión solo centraliza ruido.
+
+## Conclusiones
+
+El flujo `forwarder → indexer → búsqueda` es la base de un SOC. La configuración de puertos, inputs y campos es tan importante como la herramienta. La práctica demuestra cómo los logs locales de los ejercicios anteriores se convierten en evidencia consultable y correlacionable.
+
+## Aprendizajes
+
+- La centralización permite correlacionar fuentes que por separado parecen eventos aislados.
+- Un SIEM no sustituye el análisis: el valor está en la consulta, el modelo de datos y la interpretación.
+
+## Referencias
+
+- Splunk — [Universal Forwarder documentation](https://docs.splunk.com/Documentation/Forwarder).
+- Splunk — [Search Reference](https://docs.splunk.com/Documentation/Splunk/latest/SearchReference).
+- Microsoft Learn — [Event 4625](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625).
+- EC-Council — [Certified SOC Analyst (CSA)](https://www.eccouncil.org/train-certify/certified-soc-analyst-csa/).
