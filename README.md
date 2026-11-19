@@ -8,9 +8,13 @@ un informe, revisar el procedimiento, mirar las evidencias y comprobar qué est�
 qué sigue pendiente**. No es una landing de servicios ni una plantilla de marketing.
 
 - **Demo local:** `http://localhost:4321/`
+- **Repositorio:** https://github.com/iSayago/izan-cybersecurity-labs
+- **Web publicada:** https://isayago.github.io/izan-cybersecurity-labs/
 - **Stack:** Astro 7, TypeScript, Tailwind CSS 4, Markdown/MDX, GitHub Actions y GitHub Pages.
 - **Contenido:** colecciones locales en `content/`, sin backend, sin base de datos y sin
   servicios de pago obligatorios.
+
+[![Deploy to GitHub Pages](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml/badge.svg)](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml)
 
 ---
 
@@ -349,6 +353,9 @@ https://TU-USUARIO.github.io/izan-cybersecurity-labs/
 
 La base se detecta automáticamente: `/izan-cybersecurity-labs/`. Todos los enlaces,
 imágenes, CSS, JS, el buscador y el sitemap se generan bajo esa ruta.
+
+**URL publicada de este repositorio:**
+https://isayago.github.io/izan-cybersecurity-labs/
 
 Primer push desde local:
 

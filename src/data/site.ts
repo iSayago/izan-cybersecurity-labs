@@ -9,7 +9,7 @@
 
 const env = import.meta.env;
 
-const github = (env.PUBLIC_GITHUB_URL ?? '').trim();
+const github = (env.PUBLIC_GITHUB_URL ?? 'https://github.com/iSayago').trim();
 const linkedin = (env.PUBLIC_LINKEDIN_URL ?? '').trim();
 const email = (env.PUBLIC_CONTACT_EMAIL ?? '').trim();
 
