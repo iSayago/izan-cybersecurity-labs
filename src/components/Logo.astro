@@ -1,0 +1,31 @@
+---
+import { withBase } from '../lib/url';
+
+interface Props {
+  compact?: boolean;
+  href?: string;
+  label?: string;
+}
+
+const { compact = false, href = '/', label = 'IZAN — Inicio' } = Astro.props;
+---
+
+<a class="brand" href={withBase(href)} aria-label={label}>
+  <svg
+    class="brand-mark"
+    viewBox="0 0 40 40"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="square"
+    aria-hidden="true"
+  >
+    <path d="M12 9H7v22h5M28 9h5v22h-5" opacity="0.9"></path>
+    <path d="M14.5 27 25.5 13" opacity="0.55"></path>
+    <circle cx="26" cy="27" r="1.8" fill="currentColor" stroke="none"></circle>
+  </svg>
+  <span class="brand-copy">
+    <span class="brand-name">IZAN</span>
+    {!compact && <span class="brand-sub">CYBERSECURITY LABS</span>}
+  </span>
+</a>

@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# generated
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# logs
+*.log
+npm-debug.log*
+
+# local content artwork that should not be published
+content/**/*.psd
+content/**/*.ai
+content/**/*.mp4
+content/**/*.mov
+
+# local verification artifacts
+.shots/
+build-*.log
+

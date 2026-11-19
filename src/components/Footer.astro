@@ -1,0 +1,70 @@
+---
+import { site } from '../data/site';
+import { withBase } from '../lib/url';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import SocialLinks from './SocialLinks.astro';
+
+const year = new Date().getFullYear();
+const buildDate = new Intl.DateTimeFormat('es-ES', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date());
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <Logo />
+        <p class="footer-note">
+          Archivo técnico personal. Laboratorios, investigaciones y documentación
+          de ciberseguridad con evidencia verificable.
+        </p>
+      </div>
+
+      <div>
+        <p class="footer-col-title">Archivo</p>
+        <nav class="footer-links" aria-label="Archivo">
+          <a href={withBase('/labs/')}>SOC Labs</a>
+          <a href={withBase('/blog/')}>Writeups</a>
+          <a href={withBase('/ai-security/')}>AI Security</a>
+          <a href={withBase('/rss.xml')}>RSS</a>
+        </nav>
+      </div>
+
+      <div>
+        <p class="footer-col-title">Sitio</p>
+        <nav class="footer-links" aria-label="Sitio">
+          <a href={withBase('/about/')}>About</a>
+          <a href={withBase('/about/#formacion')}>Formación</a>
+          <a href={withBase('/about/#contacto')}>Contacto</a>
+          <a href={withBase('/labs/#estado')}>Estado del archivo</a>
+        </nav>
+      </div>
+
+      <div>
+        <p class="footer-col-title">Profesional</p>
+        <SocialLinks stacked class="mt-2" />
+        {!site.social.github && !site.social.linkedin && !site.social.email && (
+          <p class="footer-note mt-2 text-[0.78rem]">
+            Canales profesionales pendientes de publicación.
+          </p>
+        )}
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {year} {site.name}. Contenido propio; no representa a ninguna organización.</span>
+      <span class="inline-flex items-center gap-2">
+        <span class="status-dot" aria-hidden="true"></span>
+        Build {buildDate} · Astro + GitHub Pages
+      </span>
+      <a href="#main" class="inline-flex items-center gap-1.5">
+        Volver arriba <Icon name="arrow-up-right" size={11} />
+      </a>
+    </div>
+  </div>
+</footer>

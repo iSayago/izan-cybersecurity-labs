@@ -1,0 +1,44 @@
+---
+interface Props {
+  title?: string;
+  variant?: 'note' | 'warning' | 'demo' | 'quote';
+}
+
+const { title, variant = 'note' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'callout',
+    variant === 'warning' && 'callout-warning',
+    variant === 'demo' && 'callout-demo',
+    variant === 'quote' && 'callout-quote',
+  ]}
+>
+  {title && <strong>{title}</strong>}
+  <slot />
+</div>
+
+<style>
+  .callout-warning {
+    border-left-color: var(--color-amber);
+    background: rgba(239, 183, 122, 0.045);
+  }
+  .callout-warning :global(strong) {
+    color: var(--color-amber);
+  }
+  .callout-demo {
+    border-left-color: var(--color-amber);
+    background: rgba(239, 183, 122, 0.045);
+  }
+  .callout-demo :global(strong) {
+    color: var(--color-amber);
+  }
+  .callout-quote {
+    border-left-color: var(--color-line-strong);
+    background: rgba(120, 140, 160, 0.035);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+</style>

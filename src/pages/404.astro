@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { withBase } from '../lib/url';
+---
+
+<BaseLayout title="Ruta no encontrada" noindex canonical={false}>
+  <section class="error-page">
+    <div class="wrap">
+      <p class="eyebrow">Error / 404</p>
+      <div class="error-code" aria-hidden="true">404</div>
+      <h1 class="error-title">Ruta no encontrada.</h1>
+      <p class="error-desc">
+        La dirección no existe en este archivo, o el contenido se ha movido. No hay
+        una página secreta esperando detrás del error.
+      </p>
+
+      <div class="error-actions">
+        <a class="btn btn-primary" href={withBase('/')}>
+          Volver al inicio <Icon name="arrow-right" size={13} />
+        </a>
+        <a class="btn btn-ghost" href={withBase('/labs/')}>
+          Abrir SOC Labs <Icon name="arrow-up-right" size={13} />
+        </a>
+        <button class="btn btn-ghost" type="button" data-search-open aria-haspopup="dialog" aria-expanded="false">
+          <Icon name="search" size={13} /> Buscar en el archivo
+        </button>
+      </div>
+
+      <div class="error-log" role="status">
+        <p><span class="prompt">izan@labs</span>:~$ find /ruta --type f --name "contenido"</p>
+        <p>find: no such file or directory</p>
+        <p><span class="prompt">izan@labs</span>:~$ echo $STATUS</p>
+        <p>404 — la evidencia no existe</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

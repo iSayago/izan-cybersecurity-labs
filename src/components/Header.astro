@@ -1,0 +1,67 @@
+---
+import { site } from '../data/site';
+import { isCurrentPath, withBase } from '../lib/url';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import MobileMenu from './MobileMenu.astro';
+import SearchDialog from './SearchDialog.astro';
+
+interface Props {
+  showProgress?: boolean;
+}
+
+const { showProgress = false } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <Logo />
+
+    <nav class="desktop-nav" aria-label="Navegación principal">
+      {
+        site.nav.map((item, index) => (
+          <a
+            class="nav-link"
+            href={withBase(item.href)}
+            aria-current={isCurrentPath(pathname, item.href) ? 'page' : undefined}
+          >
+            <span class="nav-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="header-tools">
+      <button
+        class="search-trigger"
+        type="button"
+        data-search-open
+        aria-haspopup="dialog"
+        aria-controls="search-dialog"
+        aria-expanded="false"
+      >
+        <Icon name="search" size={15} />
+        <span class="search-trigger-label">Buscar</span>
+        <kbd class="keycap" data-search-shortcut>⌘K</kbd>
+      </button>
+
+      <button
+        class="menu-trigger"
+        type="button"
+        data-menu-open
+        aria-haspopup="dialog"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Abrir menú"
+      >
+        <Icon name="menu" size={18} />
+      </button>
+    </div>
+  </div>
+  {showProgress && <div class="reading-progress" data-reading-progress></div>}
+</header>
+
+<SearchDialog />
+<MobileMenu />

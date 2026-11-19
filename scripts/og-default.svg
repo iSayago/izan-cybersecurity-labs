@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0v48" fill="none" stroke="#162433" stroke-width="0.8"/>
+    </pattern>
+    <radialGradient id="glow" cx="72%" cy="8%" r="65%">
+      <stop offset="0" stop-color="#56dce8" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#56dce8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#070b11"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.55"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Mark -->
+  <g fill="none" stroke="#56dce8" stroke-width="2" stroke-linecap="square" transform="translate(64 52)">
+    <path d="M18 0H4v34h14"/>
+    <path d="M48 0h14v34H48"/>
+    <path d="M22 30 44 4" opacity="0.55"/>
+    <circle cx="44" cy="30" r="2.6" fill="#56dce8" stroke="none"/>
+  </g>
+
+  <text x="142" y="72" fill="#e8eff7" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="1">IZAN</text>
+  <text x="142" y="94" fill="#77879b" font-family="monospace" font-size="10" letter-spacing="3">CYBERSECURITY LABS</text>
+
+  <text x="1136" y="72" text-anchor="end" fill="#56dce8" font-family="monospace" font-size="12" letter-spacing="2">PORTFOLIO / 2026</text>
+  <text x="1136" y="94" text-anchor="end" fill="#77879b" font-family="monospace" font-size="10" letter-spacing="2">SOC OPERATIONS · BLUE TEAM</text>
+
+  <line x1="64" y1="132" x2="1136" y2="132" stroke="#1c2937"/>
+
+  <text x="64" y="282" fill="#e8eff7" font-family="Arial, Helvetica, sans-serif" font-size="118" font-weight="600" letter-spacing="-7">Evidencia,</text>
+  <text x="64" y="402" fill="#e8eff7" font-family="Arial, Helvetica, sans-serif" font-size="118" font-weight="600" letter-spacing="-7">no <tspan fill="#56dce8" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-weight="400" letter-spacing="-3">afirmaciones.</tspan></text>
+
+  <!-- Signal -->
+  <path d="M64 466H1136" stroke="#1c2937"/>
+  <path d="M760 466 C 830 430, 880 500, 950 456 S 1080 430, 1136 450" fill="none" stroke="#56dce8" stroke-width="1" opacity="0.35"/>
+  <circle cx="886" cy="459" r="2.5" fill="#56dce8" opacity="0.7"/>
+
+  <text x="64" y="520" fill="#aab7c8" font-family="monospace" font-size="13" letter-spacing="1">LABORATORIOS · INVESTIGACIONES · EVIDENCIA VERIFICABLE</text>
+
+  <text x="64" y="578" fill="#77879b" font-family="monospace" font-size="11" letter-spacing="2">SOC OPERATIONS / LOG MANAGEMENT / TRIAGE / DFIR / AI SECURITY</text>
+  <text x="1136" y="578" text-anchor="end" fill="#56dce8" font-family="monospace" font-size="11" letter-spacing="2">DOCUMENTAR ES DEMOSTRAR</text>
+</svg>

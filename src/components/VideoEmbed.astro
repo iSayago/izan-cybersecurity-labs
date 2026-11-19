@@ -1,0 +1,84 @@
+---
+import { withBase } from '../lib/url';
+import type { VideoData } from '../lib/media';
+import Icon from './Icon.astro';
+
+interface Props {
+  video: VideoData;
+  vertical?: boolean;
+  fallbackLabel?: string;
+}
+
+const { video, fallbackLabel = 'Vídeo original' } = Astro.props;
+
+const youtubeMatch = video.url.match(
+  /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/,
+);
+const vimeoMatch = video.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+const isDirect = /\.(mp4|webm|ogg|m4v)(?:\?|#|$)/i.test(video.url);
+
+const youtubeId = youtubeMatch?.[1];
+const vimeoId = vimeoMatch?.[1];
+
+const embedUrl = youtubeId
+  ? `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`
+  : vimeoId
+    ? `https://player.vimeo.com/video/${vimeoId}?autoplay=1`
+    : null;
+
+const mediaUrl = video.url.startsWith('/') ? withBase(video.url) : video.url;
+const poster = video.poster
+  ? video.poster.startsWith('/')
+    ? withBase(video.poster)
+    : video.poster
+  : undefined;
+
+const provider = youtubeId ? 'YouTube' : vimeoId ? 'Vimeo' : isDirect ? 'Vídeo' : 'Enlace';
+const title = video.title ?? fallbackLabel;
+---
+
+{
+  isDirect && (
+    <video controls preload="metadata" poster={poster} aria-label={title}>
+      <source src={mediaUrl} />
+      Tu navegador no puede reproducir este vídeo. <a href={mediaUrl}>Abrir el archivo</a>.
+    </video>
+  )
+}
+
+{
+  !isDirect && embedUrl && (
+    <a
+      class="video-facade"
+      href={video.url}
+      target="_blank"
+      rel="noreferrer noopener"
+      data-video-facade
+      data-embed-url={embedUrl}
+      data-video-title={title}
+      aria-label={`Cargar ${title} desde ${provider}`}
+    >
+      <span class="play" aria-hidden="true">
+        <Icon name="play" size={18} />
+      </span>
+      <span>Cargar vídeo · {provider}</span>
+      <small class="font-[var(--font-serif)] text-[0.72rem] normal-case tracking-normal text-[var(--color-muted)]">
+        El reproductor se carga solo al pulsar. Sin cookies hasta entonces.
+      </small>
+    </a>
+  )
+}
+
+{
+  !isDirect && !embedUrl && (
+    <a class="video-facade" href={video.url} target="_blank" rel="noreferrer noopener">
+      <span class="play" aria-hidden="true">
+        <Icon name="external" size={18} />
+      </span>
+      <span>Abrir vídeo externo</span>
+      <small class="font-[var(--font-serif)] text-[0.72rem] normal-case tracking-normal text-[var(--color-muted)]">
+        El enlace se abre en una pestaña nueva.
+      </small>
+    </a>
+  )
+}

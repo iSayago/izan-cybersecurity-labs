@@ -1,0 +1,64 @@
+---
+interface Props {
+  moduleId: string;
+  variant?: 'card' | 'featured';
+}
+
+const { moduleId, variant = 'card' } = Astro.props;
+
+const hash = [...moduleId].reduce((total, char) => total + char.charCodeAt(0), 0);
+const uid = `art-${moduleId}-${hash}`;
+const offset = (hash % 5) * 8;
+const year = '2026';
+---
+
+<div class="module-art" aria-hidden="true">
+  <svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" role="presentation">
+    <defs>
+      <pattern id={`${uid}-grid`} width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M32 0H0v32" class="art-grid"></path>
+      </pattern>
+      <linearGradient id={`${uid}-fade`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#08101a" stop-opacity="0"></stop>
+        <stop offset="1" stop-color="#08101a" stop-opacity="0.92"></stop>
+      </linearGradient>
+    </defs>
+
+    <rect width="640" height="400" fill="#08101a"></rect>
+    <rect width="640" height="400" fill={`url(#${uid}-grid)`}></rect>
+
+    <text x="34" y="48" class="art-label">ARCHIVE / MODULE {moduleId}</text>
+    <text x="606" y="48" text-anchor="end" class="art-accent">SOC-LAB / {year}</text>
+
+    <path
+      d={`M-30 ${286 - offset} C 80 ${208 + offset}, 150 ${330 - offset}, 260 ${250 + offset} S 430 ${180 - offset}, 670 ${224 + offset}`}
+      class="art-ghost"></path>
+    <path
+      d={`M-30 ${264 - offset} C 98 ${224 + offset}, 178 ${296 - offset}, 296 ${232 + offset} S 470 ${228 - offset}, 670 ${198 + offset}`}
+      class="art-line"></path>
+    <path
+      d={`M-30 ${306 + offset} C 120 ${264 - offset}, 196 ${334 + offset}, 322 ${282 - offset} S 500 ${262 + offset}, 670 ${252 - offset}`}
+      class="art-ghost"
+      opacity="0.12"></path>
+
+    <g>
+      <circle cx="160" cy={244 + offset} r="3" class="art-node"></circle>
+      <circle cx="318" cy={238 + offset} r="3" class="art-node"></circle>
+      <circle cx="474" cy={214 - offset} r="3" class="art-node"></circle>
+      <circle cx="556" cy={236 + offset} r="3" class="art-node"></circle>
+    </g>
+
+    <line x1="34" y1="354" x2="606" y2="354" stroke="rgba(86, 220, 232, 0.16)" stroke-width="0.6"></line>
+    <text x="34" y="374" class="art-label">TELEMETRY / SYNTHETIC VISUAL</text>
+    <text x="606" y="374" text-anchor="end" class="art-label">FIG. M{moduleId}</text>
+
+    <text
+      x="600"
+      y="330"
+      text-anchor="end"
+      class="art-number"
+      opacity={variant === 'featured' ? '1' : '0.72'}
+    >{moduleId}</text>
+    <rect width="640" height="400" fill={`url(#${uid}-fade)`} opacity="0.18"></rect>
+  </svg>
+</div>

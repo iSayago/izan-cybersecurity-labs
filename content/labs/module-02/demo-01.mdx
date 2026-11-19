@@ -1,0 +1,156 @@
+---
+title: "DEMO — Triage de un intento de autenticación sospechoso"
+description: "Ejemplo sintético de informe de triage: hipótesis, consulta, evidencia, análisis y límites. No describe una práctica real ni contiene capturas de un entorno de formación."
+module: "02"
+practice: 1
+date: 2026-11-12
+updated: 2026-11-12
+categories:
+  - Incident Triage
+  - Blue Team
+tags:
+  - SIEM
+  - Windows
+  - Authentication
+  - MITRE ATT&CK
+tools:
+  - SIEM (entorno de ejemplo)
+  - Visor de eventos de Windows (ejemplo)
+  - MITRE ATT&CK
+status: demo
+featured: true
+---
+
+import Figure from '../../../src/components/Figure.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+import Callout from '../../../src/components/Callout.astro';
+
+<Callout title="Escenario sintético" variant="demo">
+  Este informe utiliza datos inventados y rangos de documentación (RFC 5737) para
+  mostrar el formato de un triage. No hay una máquina comprometida, una captura de
+  pantalla real ni un resultado atribuible a Izan.
+</Callout>
+
+## Objetivo
+
+Mostrar cómo se estructura el triage de una alerta de autenticación: qué se comprueba
+antes de escalar, qué evidencia se conserva y qué conclusiones **no** se pueden extraer
+con los datos disponibles.
+
+## Contexto y entorno del laboratorio
+
+El escenario es una red aislada y ficticia con un cliente Windows, un controlador de
+dominio y un colector de eventos. Las direcciones pertenecen a los rangos reservados
+para documentación (`192.0.2.0/24`, `198.51.100.0/24` y `203.0.113.0/24`) y los nombres
+de host son genéricos.
+
+| Elemento | Valor de ejemplo | Papel |
+| --- | --- | --- |
+| Cliente | `WIN-CLIENT-01` | Origen de los eventos de autenticación |
+| Controlador | `DC-01` | Valida las credenciales del dominio |
+| Colector | `SIEM-LAB` | Recibe y correlaciona los eventos |
+| Cuenta observada | `analyst.demo` | Cuenta sintética, sin relación con una persona real |
+
+<Figure
+  src="/images/demo/topology.svg"
+  alt="Diagrama de una red de laboratorio sintética con un cliente Windows, un controlador de dominio y un colector SIEM"
+  caption="Topología del escenario sintético. Los rangos de red son de documentación."
+  index="FIG. 01"
+  demo
+/>
+
+## Herramientas utilizadas
+
+Todas las herramientas de esta tabla se usan como **ejemplo de formato**. Ninguna
+interacción con ellas forma parte de una práctica real.
+
+| Herramienta | Uso en el ejemplo | Nota |
+| --- | --- | --- |
+| SIEM (interfaz de ejemplo) | Búsqueda y correlación de eventos | Los resultados son sintéticos |
+| Visor de eventos | Lectura del código 4625 | Entorno de ejemplo |
+| MITRE ATT&CK | Contextualizar la técnica T1110 | Marco público de referencia |
+
+## Procedimiento realizado
+
+1. **Definir la pregunta.** ¿Los fallos de autenticación son ruido de usuario o un
+   patrón compatible con fuerza bruta?
+2. **Acotar el intervalo.** Se revisan 30 minutos alrededor de la primera alerta.
+3. **Correlacionar.** Se agrupan los eventos por cuenta, origen y código de resultado.
+4. **Clasificar.** Se decide si la evidencia permite escalar o si falta contexto.
+
+```text
+index=windows sourcetype=WinEventLog:Security EventCode=4625
+| stats count min(_time) as first_seen max(_time) as last_seen
+        values(src_ip) as sources by TargetUserName
+| where count > 5
+| convert ctime(first_seen) ctime(last_seen)
+```
+
+| Hora (UTC) | Evento | Cuenta | Origen | Lectura inicial |
+| --- | --- | --- | --- | --- |
+| 09:14:02 | 4625 | `analyst.demo` | 198.51.100.24 | Primer fallo |
+| 09:16:20 | 4625 × 12 | `analyst.demo` | 198.51.100.24 | Patrón repetido |
+| 09:18:04 | 4624 | `analyst.demo` | 192.0.2.15 | Acceso correcto interno |
+| 09:21:37 | 4625 | `analyst.demo` | 198.51.100.24 | Reintento posterior |
+
+<Figure
+  src="/images/demo/timeline.svg"
+  alt="Línea de tiempo sintética con eventos de autenticación correctos y fallidos"
+  caption="Línea de tiempo construida con datos de ejemplo. No es una captura de una consola real."
+  index="FIG. 02"
+  demo
+/>
+
+## Evidencias y capturas
+
+Las siguientes imágenes son **diagramas ilustrativos**, no capturas de pantalla. Se
+incluyen para comprobar que la galería, los pies de figura y la vista ampliada
+funcionan dentro de un informe.
+
+<EvidenceGallery
+  images={[
+    {
+      src: '/images/demo/auth-events.svg',
+      alt: 'Gráfico de barras sintético con el número de fallos de autenticación por cuenta',
+      caption: 'Distribución sintética de fallos por cuenta. DEMO.',
+    },
+    {
+      src: '/images/demo/timeline.svg',
+      alt: 'Línea de tiempo sintética de eventos de autenticación',
+      caption: 'Reconstrucción temporal del escenario ficticio. DEMO.',
+    },
+    {
+      src: '/images/demo/topology.svg',
+      alt: 'Diagrama de topología de laboratorio sintético',
+      caption: 'Topología de referencia del escenario. DEMO.',
+    },
+  ]}
+  note="Imágenes de demostración. No son evidencia de una práctica real. Pulsa para ampliar."
+/>
+
+## Análisis de resultados
+
+En el conjunto sintético se observa un patrón de fallos repetidos desde una única
+dirección externa, seguido de un acceso correcto desde la red interna. Ese acceso
+correcto podría ser legítimo o no; con estos datos **no es posible determinarlo**.
+
+El análisis se detiene donde termina la evidencia:
+
+- La repetición de 4625 es compatible con fuerza bruta, pero también con una
+  aplicación mal configurada.
+- El 4624 posterior requiere comprobar el método de autenticación, el dispositivo
+  de origen y la actividad de la sesión.
+- Sin telemetría de endpoint ni revisión de la cuenta, no se puede afirmar que haya
+  habido compromiso.
+
+## Conclusiones y aprendizajes
+
+El valor del informe no está en la alerta, sino en explicar qué se ha comprobado y
+qué falta. Un triage útil separa observación de interpretación, conserva las consultas
+y declara las limitaciones antes de escalar.
+
+## Referencias
+
+- MITRE ATT&CK — [Brute Force: Password Guessing (T1110.001)](https://attack.mitre.org/techniques/T1110/001/).
+- Microsoft Learn — [Event 4625: An account failed to log on](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625).
+- IETF — [RFC 5737: IPv4 Address Blocks Reserved for Documentation](https://datatracker.ietf.org/doc/html/rfc5737).

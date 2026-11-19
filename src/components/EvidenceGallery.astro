@@ -1,0 +1,72 @@
+---
+import { withBase } from '../lib/url';
+import Icon from './Icon.astro';
+
+interface GalleryImage {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  images: GalleryImage[];
+  note?: string;
+}
+
+const { images, note = 'Pulsa una imagen para ampliarla. Usa las flechas del teclado para navegar.' } = Astro.props;
+---
+
+{
+  images.length > 0 && (
+    <div class="gallery">
+      <div class="gallery-grid">
+        {images.map((image, index) => {
+          const src = image.src.startsWith('/') ? withBase(image.src) : image.src;
+          return (
+            <a
+              class="gallery-item"
+              href={src}
+              target="_blank"
+              rel="noreferrer noopener"
+              data-gallery-item
+              data-src={src}
+              data-alt={image.alt}
+              data-caption={image.caption ?? ''}
+              aria-label={`Ampliar imagen ${index + 1}: ${image.caption ?? image.alt}`}
+            >
+              <img src={src} alt={image.alt} loading="lazy" decoding="async" width="800" height="500" />
+              {image.caption && <span class="gallery-item-caption">{image.caption}</span>}
+            </a>
+          );
+        })}
+      </div>
+      {note && <p class="gallery-note">{note}</p>}
+
+      <dialog class="lightbox" aria-label="Vista ampliada de la evidencia">
+        <div class="lightbox-inner">
+          <div class="lightbox-head">
+            <span>EVIDENCIA / VISTA AMPLIADA</span>
+            <span data-lightbox-counter>1 / {images.length}</span>
+          </div>
+          <div class="lightbox-body">
+            <img data-lightbox-image src={images[0] ? (images[0].src.startsWith('/') ? withBase(images[0].src) : images[0].src) : ''} alt="" />
+          </div>
+          <div class="lightbox-foot">
+            <p class="lightbox-caption" data-lightbox-caption></p>
+            <div class="lightbox-nav">
+              <button type="button" class="icon-button" data-lightbox-prev aria-label="Imagen anterior">
+                <Icon name="arrow-left" size={15} />
+              </button>
+              <button type="button" class="icon-button" data-lightbox-next aria-label="Imagen siguiente">
+                <Icon name="arrow-right" size={15} />
+              </button>
+              <button type="button" class="icon-button" data-lightbox-close aria-label="Cerrar vista ampliada">
+                <Icon name="close" size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </dialog>
+    </div>
+  )
+}

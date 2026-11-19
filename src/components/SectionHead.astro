@@ -1,0 +1,39 @@
+---
+interface Props {
+  index: string;
+  title: string;
+  description?: string;
+  link?: string;
+  linkLabel?: string;
+  class?: string;
+  id?: string;
+}
+
+const {
+  index,
+  title,
+  description,
+  link,
+  linkLabel = 'Ver todo',
+  class: className = '',
+  id,
+} = Astro.props;
+---
+
+<div class:list={['section-head', className]}>
+  <span class="section-index" aria-hidden="true">{index}</span>
+  <div class="section-head-copy">
+    <h2 class="section-title" id={id}>{title}</h2>
+    {description && <p class="section-desc">{description}</p>}
+  </div>
+  {
+    link && (
+      <a class="link-arrow section-link" href={link}>
+        {linkLabel}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M7 17 17 7M8 7h9v9" />
+        </svg>
+      </a>
+    )
+  }
+</div>

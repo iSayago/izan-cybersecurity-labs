@@ -1,0 +1,171 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContentStatusNotice from '../../components/ContentStatusNotice.astro';
+import Icon from '../../components/Icon.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import TagList from '../../components/TagList.astro';
+import { formatDate, formatLongDate, isoDate, readingTime } from '../../lib/content';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('research', ({ data }) => data.status !== 'draft');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const minutes = readingTime(entry.body);
+const noindex = entry.data.status === 'demo';
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
+const siteUrl = Astro.site ?? new URL('http://localhost:4321');
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ScholarlyArticle',
+  headline: entry.data.title,
+  description: entry.data.description,
+  url: canonical,
+  datePublished: isoDate(entry.data.date),
+  dateModified: isoDate(entry.data.updated ?? entry.data.date),
+  author: {
+    '@type': 'Person',
+    name: 'Izan',
+    url: new URL(withBase('/about/'), siteUrl).toString(),
+  },
+  inLanguage: 'es',
+  keywords: entry.data.tags.join(', '),
+};
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  image={entry.data.cover ?? '/og-default.png'}
+  noindex={noindex}
+  type="article"
+  publishedTime={isoDate(entry.data.date)}
+  modifiedTime={isoDate(entry.data.updated ?? entry.data.date)}
+  tags={entry.data.tags}
+  showProgress
+  jsonLd={articleJsonLd}
+>
+  <article>
+    <header class="report-head wrap">
+      <Breadcrumbs
+        items={[
+          { label: 'AI Security', href: withBase('/ai-security/') },
+          { label: entry.data.type },
+          { label: 'Publicación' },
+        ]}
+      />
+
+      <div class="report-badges">
+        <StatusBadge status={entry.data.status} />
+        <span class="badge badge-module">AI Security</span>
+        <span class="badge badge-no-dot">{entry.data.type}</span>
+        {noindex && <span class="badge badge-pending badge-no-dot">No indexada</span>}
+      </div>
+
+      <h1 class="report-title">{entry.data.title}</h1>
+      <p class="report-lede">{entry.data.description}</p>
+
+      <dl class="report-meta">
+        <div>
+          <dt>Fecha</dt>
+          <dd>{formatLongDate(entry.data.date)}</dd>
+        </div>
+        <div>
+          <dt>Tipo</dt>
+          <dd>{entry.data.type}</dd>
+        </div>
+        <div>
+          <dt>Lectura</dt>
+          <dd>{minutes} min</dd>
+        </div>
+        <div>
+          <dt>Etiquetas</dt>
+          <dd>{entry.data.tags.length}</dd>
+        </div>
+      </dl>
+
+      <div class="report-actions">
+        <a class="btn btn-ghost" href={withBase('/ai-security/')}>
+          <Icon name="arrow-left" size={13} /> Volver a AI Security
+        </a>
+      </div>
+
+      <TagList tags={entry.data.tags} linked basePath="/ai-security/" />
+    </header>
+
+    <div class="report-grid wrap">
+      <div class="report-main">
+        <ContentStatusNotice status={entry.data.status} />
+
+        {headings.length > 0 && (
+          <details class="toc-mobile">
+            <summary>
+              <span>En esta página</span>
+              <span>{headings.length} apartados</span>
+            </summary>
+            <TableOfContents headings={headings} compact />
+          </details>
+        )}
+
+        <div class="report-section">
+          <div class="report-section-head">
+            <h2 class="report-section-title">Investigación</h2>
+            <span class="report-section-index">AI SEC / {formatDate(entry.data.date)}</span>
+          </div>
+          <div class="prose" id="informe">
+            <Content />
+          </div>
+        </div>
+      </div>
+
+      <aside class="report-aside">
+        {headings.length > 0 && <TableOfContents headings={headings} />}
+        <div class="fiche">
+          <p class="fiche-head">Ficha de la publicación</p>
+          <dl>
+            <div class="fiche-row">
+              <dt>Estado</dt>
+              <dd>{entry.data.status === 'demo' ? 'Demostración' : 'Publicada'}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Tipo</dt>
+              <dd>{entry.data.type}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Fecha</dt>
+              <dd>{formatDate(entry.data.date)}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Lectura</dt>
+              <dd>{minutes} min</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="aside-note">
+          Esta sección solo publica trabajo con alcance y método documentados. La
+          ausencia de proyectos ficticios es deliberada.
+        </p>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .aside-note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.52rem;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+</style>

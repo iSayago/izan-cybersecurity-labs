@@ -1,0 +1,29 @@
+---
+import { withBase } from '../lib/url';
+
+interface Props {
+  tags: string[];
+  linked?: boolean;
+  basePath?: string;
+}
+
+const { tags, linked = false, basePath = '/labs/' } = Astro.props;
+---
+
+{
+  tags.length > 0 && (
+    <ul class="chip-row" aria-label="Etiquetas">
+      {tags.map((tag) =>
+        linked ? (
+          <li>
+            <a class="tag" href={`${withBase(basePath)}?q=${encodeURIComponent(tag)}`}>
+              {tag}
+            </a>
+          </li>
+        ) : (
+          <li class="tag">{tag}</li>
+        ),
+      )}
+    </ul>
+  )
+}

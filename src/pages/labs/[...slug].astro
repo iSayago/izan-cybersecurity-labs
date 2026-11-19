@@ -1,0 +1,328 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContentStatusNotice from '../../components/ContentStatusNotice.astro';
+import Icon from '../../components/Icon.astro';
+import PendingSections from '../../components/PendingSections.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import TagList from '../../components/TagList.astro';
+import VideoSection from '../../components/VideoSection.astro';
+import {
+  adjacentLabs,
+  formatDate,
+  formatLongDate,
+  getLabs,
+  isoDate,
+  labPath,
+  moduleOf,
+  readingTime,
+  statusMeta,
+} from '../../lib/content';
+import { getReportCoverage } from '../../lib/report';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const labs = await getCollection('labs', ({ data }) => data.status !== 'draft');
+  return labs.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const module = moduleOf(entry);
+const coverage = getReportCoverage(headings);
+const allLabs = await getLabs();
+const adjacent = adjacentLabs(entry, allLabs);
+const minutes = readingTime(entry.body);
+
+const isDemo = entry.data.status === 'demo';
+const isPending = entry.data.status === 'pending';
+const noindex = isDemo || isPending;
+const hasVideos = Boolean(entry.data.originalVideo || entry.data.summaryVideo);
+const showVideos = hasVideos || isDemo;
+const pageTitle = entry.data.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
+const siteUrl = Astro.site ?? new URL('http://localhost:4321');
+const image = entry.data.cover ? entry.data.cover : '/og-default.png';
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: entry.data.title,
+  description: entry.data.description,
+  url: canonical,
+  mainEntityOfPage: canonical,
+  datePublished: isoDate(entry.data.date),
+  dateModified: isoDate(entry.data.updated ?? entry.data.date),
+  author: {
+    '@type': 'Person',
+    name: 'Izan',
+    url: new URL(withBase('/about/'), siteUrl).toString(),
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'IZAN | Cybersecurity Labs',
+  },
+  keywords: [...entry.data.categories, ...entry.data.tags].join(', '),
+  articleSection: `Módulo ${entry.data.module} — ${module.title}`,
+  inLanguage: 'es',
+  isAccessibleForFree: true,
+  ...(entry.data.cover ? { image: new URL(withBase(entry.data.cover), siteUrl).toString() } : {}),
+};
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'SOC Labs',
+      item: new URL(withBase('/labs/'), siteUrl).toString(),
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: `Módulo ${entry.data.module}`,
+      item: new URL(withBase(`/labs/#${module.slug}`), siteUrl).toString(),
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: entry.data.title,
+      item: canonical,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={entry.data.description}
+  image={image}
+  imageAlt={entry.data.coverAlt ?? pageTitle}
+  noindex={noindex}
+  type="article"
+  publishedTime={isoDate(entry.data.date)}
+  modifiedTime={isoDate(entry.data.updated ?? entry.data.date)}
+  tags={entry.data.tags}
+  showProgress
+  jsonLd={[articleJsonLd, breadcrumbJsonLd]}
+>
+  <article>
+    <header class="report-head wrap">
+      <Breadcrumbs
+        items={[
+          { label: 'SOC Labs', href: withBase('/labs/') },
+          { label: `Módulo ${entry.data.module}`, href: withBase(`/labs/#${module.slug}`) },
+          { label: `Práctica ${String(entry.data.practice).padStart(2, '0')}` },
+        ]}
+      />
+
+      <div class="report-badges">
+        <StatusBadge status={entry.data.status} />
+        <span class="badge badge-module">Módulo {entry.data.module}</span>
+        <span class="badge badge-no-dot">Práctica {String(entry.data.practice).padStart(2, '0')}</span>
+        {noindex && <span class="badge badge-pending badge-no-dot">No indexada</span>}
+      </div>
+
+      <h1 class="report-title">{entry.data.title}</h1>
+      <p class="report-lede">{entry.data.description}</p>
+
+      <dl class="report-meta">
+        <div>
+          <dt>Fecha</dt>
+          <dd>{formatLongDate(entry.data.date)}</dd>
+        </div>
+        <div>
+          <dt>Módulo</dt>
+          <dd>{entry.data.module} / 08</dd>
+        </div>
+        <div>
+          <dt>Lectura</dt>
+          <dd>{minutes} min · {headings.length} apartados</dd>
+        </div>
+        <div>
+          <dt>Cobertura</dt>
+          <dd>{coverage.completed.length} / {coverage.total} secciones</dd>
+        </div>
+      </dl>
+
+      <div class="report-actions">
+        {entry.data.repository && (
+          <a class="btn btn-ghost" href={entry.data.repository} target="_blank" rel="noreferrer noopener">
+            <Icon name="github" size={13} /> Repositorio
+          </a>
+        )}
+        {entry.data.documentation && (
+          <a class="btn btn-ghost" href={entry.data.documentation} target="_blank" rel="noreferrer noopener">
+            <Icon name="file" size={13} /> Documentación
+          </a>
+        )}
+        {showVideos && (
+          <a class="btn btn-ghost" href="#video-title">
+            <Icon name="video" size={13} /> Registro audiovisual
+          </a>
+        )}
+        <a class="btn btn-ghost" href={withBase(`/labs/#${module.slug}`)}>
+          <Icon name="arrow-left" size={13} /> Volver al módulo
+        </a>
+      </div>
+
+      <TagList tags={[...entry.data.categories, ...entry.data.tags]} linked basePath="/labs/" />
+    </header>
+
+    <div class="report-grid wrap">
+      <div class="report-main">
+        <ContentStatusNotice status={entry.data.status} />
+
+        {headings.length > 0 && (
+          <details class="toc-mobile">
+            <summary>
+              <span>En esta página</span>
+              <span>{coverage.percentage}% documentado</span>
+            </summary>
+            <TableOfContents headings={headings} compact />
+          </details>
+        )}
+
+        {showVideos && (
+          <VideoSection
+            original={entry.data.originalVideo}
+            summary={entry.data.summaryVideo}
+            showPending={isDemo}
+          />
+        )}
+
+        <div class="report-section">
+          <div class="report-section-head">
+            <h2 class="report-section-title">Informe de la práctica</h2>
+            <span class="report-section-index">{coverage.percentage}% documentado</span>
+          </div>
+          <div class="prose" id="informe">
+            <Content />
+          </div>
+        </div>
+
+        <PendingSections missing={coverage.missing} total={coverage.total} demo={isDemo} />
+
+        <nav class="report-pager" aria-label="Prácticas del mismo módulo">
+          {adjacent.previous ? (
+            <a class="pager-link" href={withBase(labPath(adjacent.previous))}>
+              <span class="pager-label">
+                <Icon name="arrow-left" size={12} /> Anterior
+              </span>
+              <span class="pager-title">{adjacent.previous.data.title}</span>
+            </a>
+          ) : (
+            <span class="pager-link pager-link-empty">
+              <span class="pager-label">Anterior</span>
+              <span class="pager-title">Primera práctica del módulo</span>
+            </span>
+          )}
+
+          {adjacent.next ? (
+            <a class="pager-link pager-link-next" href={withBase(labPath(adjacent.next))}>
+              <span class="pager-label">
+                Siguiente <Icon name="arrow-right" size={12} />
+              </span>
+              <span class="pager-title">{adjacent.next.data.title}</span>
+            </a>
+          ) : (
+            <span class="pager-link pager-link-empty pager-link-next">
+              <span class="pager-label">Siguiente</span>
+              <span class="pager-title">No hay otra práctica en este módulo</span>
+            </span>
+          )}
+        </nav>
+      </div>
+
+      <aside class="report-aside">
+        {headings.length > 0 && (
+          <TableOfContents headings={headings} coverage={coverage.percentage} />
+        )}
+
+        <div class="fiche">
+          <p class="fiche-head">Ficha del informe</p>
+          <dl>
+            <div class="fiche-row">
+              <dt>Estado</dt>
+              <dd>{statusMeta[entry.data.status].label}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Módulo</dt>
+              <dd>{entry.data.module} / 08</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Práctica</dt>
+              <dd>{String(entry.data.practice).padStart(2, '0')}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Fecha</dt>
+              <dd>{formatDate(entry.data.date)}</dd>
+            </div>
+            {entry.data.updated && (
+              <div class="fiche-row">
+                <dt>Actualizado</dt>
+                <dd>{formatDate(entry.data.updated)}</dd>
+              </div>
+            )}
+            <div class="fiche-row">
+              <dt>Herramientas</dt>
+              <dd>{entry.data.tools.length > 0 ? entry.data.tools.length : 'Sin registrar'}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Vídeo original</dt>
+              <dd>{entry.data.originalVideo ? 'Publicado' : 'Pendiente'}</dd>
+            </div>
+            <div class="fiche-row">
+              <dt>Resumen 9:16</dt>
+              <dd>{entry.data.summaryVideo ? 'Publicado' : 'Pendiente'}</dd>
+            </div>
+          </dl>
+
+          <div class="coverage">
+            <div class="coverage-head">
+              <span>Cobertura documental</span>
+              <span>{coverage.completed.length} / {coverage.total}</span>
+            </div>
+            <div
+              class="coverage-bar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax={coverage.total}
+              aria-valuenow={coverage.completed.length}
+              aria-label="Secciones documentadas"
+            >
+              <span style={`width: ${coverage.percentage}%`}></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="aside-note">
+          Esta ficha se genera desde el frontmatter. Si algo no está documentado,
+          aparece como pendiente: no se rellena automáticamente.
+        </p>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .aside-note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.52rem;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 560px) {
+    .status-row {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+  }
+</style>

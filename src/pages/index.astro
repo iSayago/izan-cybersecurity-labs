@@ -1,0 +1,378 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHead from '../components/SectionHead.astro';
+import LabCard from '../components/LabCard.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { modules } from '../data/modules';
+import {
+  countByStatus,
+  formatDate,
+  getLatestItems,
+  getLabs,
+  getPosts,
+  getResearch,
+} from '../lib/content';
+import { withBase } from '../lib/url';
+
+const labs = await getLabs();
+const posts = await getPosts();
+const research = await getResearch();
+const counts = countByStatus(labs);
+const latest = getLatestItems(labs, posts, research, 4);
+const courseModules = modules.filter((module) => module.id !== '01');
+const pendingLabel =
+  counts.pending === 1 ? '1 plantilla pendiente' : `${counts.pending} plantillas pendientes`;
+
+const featured = labs.filter((entry) => entry.data.featured);
+const primary = featured[0] ?? labs[0];
+const stack = labs.filter((entry) => entry.id !== primary?.id).slice(0, 2);
+const latestDate = latest[0]?.date;
+
+const principles = [
+  {
+    title: 'Evidencia primero',
+    body: 'Cada afirmación del informe debe poder rastrearse hasta una captura, un log, una consulta o un diagrama.',
+  },
+  {
+    title: 'Límites explícitos',
+    body: 'Qué es real, qué es sintético y qué no permite concluir el experimento se escribe junto al resultado.',
+  },
+  {
+    title: 'Publicación separada del progreso',
+    body: 'Completar una práctica no publica el informe. La documentación se revisa y se publica cuando está lista.',
+  },
+];
+
+const areas = [
+  {
+    title: 'SOC Operations',
+    body: 'Monitorización, triage y análisis de eventos.',
+    state: 'Enfoque actual',
+    tone: '',
+  },
+  {
+    title: 'Blue Team',
+    body: 'Detección, respuesta y documentación.',
+    state: 'Enfoque actual',
+    tone: '',
+  },
+  {
+    title: 'DFIR',
+    body: 'Forense y análisis de malware.',
+    state: 'En formación',
+    tone: 'area-state-muted',
+  },
+  {
+    title: 'Pentesting',
+    body: 'Ampliación futura del perfil ofensivo.',
+    state: 'Previsto',
+    tone: 'area-state-future',
+  },
+  {
+    title: 'AI Security',
+    body: 'Línea de investigación planificada.',
+    state: 'Previsto',
+    tone: 'area-state-future',
+  },
+];
+---
+
+<BaseLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-inner">
+      <div class="hero-topline">
+        <p class="eyebrow">SOC Operations · Blue Team · Cybersecurity</p>
+        <p class="hero-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          {site.course.status} · {site.course.labsCompleted} prácticas realizadas
+        </p>
+      </div>
+
+      <h1 class="hero-title" id="hero-title">
+        <span class="line">Evidencia,</span>
+        <span class="line">no <em>afirmaciones.</em></span>
+      </h1>
+
+      <div class="hero-lower">
+        <div>
+          <p class="hero-lede">
+            Portfolio personal de ciberseguridad. Documentación de laboratorios,
+            investigaciones técnicas y prácticas centradas en monitorización,
+            detección de amenazas, análisis de eventos y respuesta ante incidentes.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href={withBase('/labs/')}>
+              Explorar SOC Labs <Icon name="arrow-right" size={13} />
+            </a>
+            <a class="btn btn-ghost" href={withBase('/blog/')}>
+              Leer últimas notas <Icon name="arrow-up-right" size={13} />
+            </a>
+          </div>
+
+          <p class="hero-note">
+            <Icon name="check" size={13} />
+            <span>
+              {counts.published} informes publicados · {counts.demo} demostraciones ·
+              {pendingLabel}. El contenido DEMO está señalado.
+            </span>
+          </p>
+        </div>
+
+        <aside class="archive-card" aria-labelledby="archive-title">
+          <div class="archive-head">
+            <span id="archive-title">Archivo / estado</span>
+            <strong>2026</strong>
+          </div>
+
+          <div class="signal" aria-hidden="true">
+            <svg viewBox="0 0 320 74" preserveAspectRatio="none">
+              <path class="signal-line-ghost" d="M0 52 C 36 52, 48 36, 74 38 S 116 58, 144 48 S 186 28, 214 36 S 254 52, 320 40"></path>
+              <path class="signal-line" d="M0 52 C 36 52, 48 36, 74 38 S 116 58, 144 48 S 186 28, 214 36 S 254 52, 320 40"></path>
+              <circle class="signal-dot" cx="74" cy="38" r="2.2"></circle>
+              <circle class="signal-dot" cx="144" cy="48" r="2.2"></circle>
+              <circle class="signal-dot" cx="214" cy="36" r="2.2"></circle>
+              <line x1="0" y1="37" x2="320" y2="37" stroke="#1c2937" stroke-width="0.7"></line>
+              <text x="0" y="11" fill="#77879b" font-family="monospace" font-size="6" letter-spacing="1.4">SYNTHETIC SIGNAL / NOT LIVE DATA</text>
+            </svg>
+          </div>
+
+          <div class="archive-stats">
+            <div class="archive-stat">
+              <strong>{String(courseModules.length).padStart(2, '0')}</strong>
+              <span>Módulos del recorrido</span>
+            </div>
+            <div class="archive-stat">
+              <strong>{String(site.course.labsCompleted).padStart(2, '0')}</strong>
+              <span>Prácticas realizadas</span>
+            </div>
+            <div class="archive-stat">
+              <strong>{String(counts.published).padStart(2, '0')}</strong>
+              <span>Informes publicados</span>
+            </div>
+            <div class="archive-stat">
+              <strong>{String(counts.demo).padStart(2, '0')}</strong>
+              <span>Demos de formato</span>
+            </div>
+          </div>
+
+          <div class="archive-list">
+            {
+              courseModules.map((module) => (
+                <a class="archive-row" href={withBase(`/labs/#${module.slug}`)}>
+                  <b>{module.id}</b>
+                  <span
+                    class:list={[
+                      'state',
+                      module.documentation === 'in-preparation' && 'state-progress',
+                      module.documentation === 'not-started' && 'state-pending',
+                    ]}
+                    aria-hidden="true"
+                  />
+                  <span>{module.documentation === 'in-preparation' ? 'En preparación' : 'Pendiente'}</span>
+                </a>
+              ))
+            }
+          </div>
+
+          <p class="archive-foot">
+            Estado del archivo, no del curso. Última entrada: {formatDate(latestDate)}.
+          </p>
+        </aside>
+      </div>
+
+      <div class="focus-strip" aria-label="Áreas de interés">
+        <span>SOC Operations</span>
+        <span>Log Management</span>
+        <span>Incident Triage</span>
+        <span>Threat Detection</span>
+        <span>DFIR</span>
+        <span>AI Security / Próx.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="latest-title">
+    <div class="wrap">
+      <SectionHead
+        index="01"
+        id="latest-title"
+        title="Últimas publicaciones"
+        description="Laboratorios y notas del archivo. Las piezas de demostración se identifican para no confundirlas con trabajo real."
+        link={withBase('/labs/')}
+        linkLabel="Abrir SOC Labs"
+      />
+
+      {
+        latest.length > 0 ? (
+          <div class="entry-list">
+            {latest.map((item) => (
+              <a class="entry" href={withBase(item.url)}>
+                <span class="entry-meta">
+                  <span class:list={['entry-type', item.status === 'demo' && 'entry-status-demo']}>
+                    {item.label}
+                    {item.status === 'demo' ? ' / DEMO' : ''}
+                  </span>
+                  <span class="entry-date">{formatDate(item.date)}</span>
+                </span>
+                <span class="entry-main">
+                  <span class="entry-title">{item.title}</span>
+                  <span class="entry-desc">{item.description}</span>
+                </span>
+                <span class="entry-arrow" aria-hidden="true">
+                  <Icon name="arrow-up-right" size={14} />
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-state">
+            <h3>Todavía no hay publicaciones.</h3>
+            <p>El archivo se irá completando con prácticas revisadas.</p>
+          </div>
+        )
+      }
+
+      {
+        counts.demo > 0 && (
+          <p class="legend-line">
+            <StatusBadge status="demo" />
+            <span>Las filas marcadas DEMO muestran el sistema de documentación; no son prácticas realizadas.</span>
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section section-soft" aria-labelledby="labs-title">
+    <div class="wrap">
+      <SectionHead
+        index="02"
+        id="labs-title"
+        title="Laboratorios en el archivo"
+        description="Módulos del programa SOC Analyst (CSA) de EC-Council. El orden y los títulos se mantienen; la documentación se publica por separado."
+        link={withBase('/labs/')}
+        linkLabel="Ver todos los módulos"
+      />
+
+      {
+        primary ? (
+          <div class="featured-grid">
+            <LabCard entry={primary} variant="featured" />
+
+            <div class="featured-stack">
+              {stack.map((entry) => <LabCard entry={entry} />)}
+              <div class="method-panel">
+                <p class="method-quote">
+                  “No publico una práctica hasta poder explicar el objetivo, el
+                  procedimiento y la evidencia.”
+                </p>
+                <div class="method-meta">
+                  <p>MÉTODO / ARCHIVO</p>
+                  <p class="mt-2">
+                    La documentación se escribe en Markdown, se revisa y se publica
+                    cuando la evidencia está disponible.
+                  </p>
+                  <a class="link-arrow mt-4" href={withBase('/about/')}>
+                    Cómo trabajo <Icon name="arrow-up-right" size={12} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="empty-state">
+            <h3>Los módulos están preparados.</h3>
+            <p>Las primeras prácticas aparecerán aquí cuando su documentación esté publicada.</p>
+          </div>
+        )
+      }
+
+      {
+        counts.demo > 0 && (
+          <p class="legend-line">
+            <span>Las tarjetas DEMO existen para validar el diseño del archivo.</span>
+            <a class="link" href={withBase('/labs/#estado')}>Leer el estado del archivo</a>
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="formation-title">
+    <div class="wrap">
+      <SectionHead
+        index="03"
+        id="formation-title"
+        title="Formación y método"
+        description="Un archivo técnico se sostiene sobre lo que se puede revisar, no sobre lo que se afirma."
+        link={withBase('/about/#formacion')}
+        linkLabel="Ver formación"
+      />
+
+      <div class="home-split">
+        <div class="formation-panel">
+          <div class="formation-head">
+            <span class="micro-label">Formación actual</span>
+            <span class="badge badge-published">En curso</span>
+          </div>
+          <h3 class="formation-title">EC-Council — SOC Analyst (CSA)</h3>
+          <p class="formation-issuer">SOC Operations · Blue Team</p>
+          <p class="formation-note">{site.course.note}</p>
+
+          <div class="formation-stats">
+            <div class="formation-stat">
+              <strong>{String(site.course.labsCompleted).padStart(2, '0')}</strong>
+              <span>Prácticas realizadas</span>
+            </div>
+            <div class="formation-stat">
+              <strong>{String(courseModules.length).padStart(2, '0')}</strong>
+              <span>Módulos del recorrido</span>
+            </div>
+            <div class="formation-stat">
+              <strong>{String(counts.published).padStart(2, '0')}</strong>
+              <span>Informes publicados</span>
+            </div>
+          </div>
+
+          <div class="formation-foot">
+            <span>02–04: documentación en preparación · 05–08: pendientes</span>
+            <a class="link" href={withBase('/labs/#estado')}>Estado del archivo</a>
+          </div>
+        </div>
+
+        <div>
+          <p class="micro-label mb-4">Reglas de publicación</p>
+          <div class="principle-list">
+            {principles.map((principle, index) => (
+              <div class="principle">
+                <span class="principle-index">{String(index + 1).padStart(2, '0')}</span>
+                <div>
+                  <h3>{principle.title}</h3>
+                  <p>{principle.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="area-grid" aria-label="Áreas de trabajo">
+        {areas.map((area) => (
+          <div class="area-card">
+            <h3>{area.title}</h3>
+            <p>{area.body}</p>
+            <span class:list={['area-state', area.tone]}>{area.state}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <ContactBlock />
+  </div>
+</BaseLayout>

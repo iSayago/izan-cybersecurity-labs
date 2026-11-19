@@ -1,0 +1,55 @@
+---
+import { hasContactChannels } from '../data/site';
+import { withBase } from '../lib/url';
+import Icon from './Icon.astro';
+import SocialLinks from './SocialLinks.astro';
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<section class:list={['contact-block', compact && 'contact-block-compact']} id="contacto" aria-labelledby="contact-title">
+  <div class="contact-grid">
+    <div>
+      <p class="eyebrow">Contacto</p>
+      <h2 id="contact-title" class="contact-title">
+        Canales <em>profesionales.</em>
+      </h2>
+    </div>
+
+    <div class="contact-copy">
+      <p>
+        Para oportunidades, colaboraciones o correcciones sobre el contenido.
+        Este portfolio no usa formularios ni recoge datos: la conversación ocurre
+        en los canales que aparecen aquí.
+      </p>
+
+      {hasContactChannels ? (
+        <SocialLinks showHandles class="contact-links" />
+      ) : (
+        <p class="contact-missing">
+          Los canales profesionales se publicarán aquí cuando estén configurados.
+          Mientras tanto, este sitio se mantiene como archivo técnico: sin formularios,
+          sin perfiles inventados y sin recogida de datos.
+        </p>
+      )}
+
+      <div class="contact-actions">
+        <a class="btn btn-primary" href={withBase('/labs/')}>
+          Explorar laboratorios <Icon name="arrow-right" size={13} />
+        </a>
+        <a class="btn btn-ghost" href={withBase('/about/#formacion')}>
+          Ver formación <Icon name="arrow-up-right" size={13} />
+        </a>
+      </div>
+
+      <p class="contact-note">
+        <Icon name="shield" size={13} />
+        Sin formularios, sin cookies de seguimiento y sin servicios de pago.
+      </p>
+    </div>
+  </div>
+</section>

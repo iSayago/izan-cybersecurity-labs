@@ -1,0 +1,45 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  compact?: boolean;
+  coverage?: number;
+}
+
+const { headings, compact = false, coverage } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+
+let sectionIndex = 0;
+const numbered = items.map((heading) => {
+  if (heading.depth === 2) sectionIndex += 1;
+  return {
+    ...heading,
+    number: heading.depth === 2 ? String(sectionIndex).padStart(2, '0') : '',
+  };
+});
+---
+
+{
+  numbered.length > 0 && (
+    <nav class:list={['toc', compact && 'toc-compact']} aria-label="En esta página">
+      {!compact && (
+        <p class="toc-title">
+          <span>En esta página</span>
+          {typeof coverage === 'number' && <span>{coverage}%</span>}
+        </p>
+      )}
+      <div class="toc-list">
+        {numbered.map((heading) => (
+          <a
+            class:list={['toc-link', heading.depth === 3 && 'depth-3']}
+            href={`#${heading.slug}`}
+          >
+            <span class="toc-number">{heading.number}</span>
+            {heading.text}
+          </a>
+        ))}
+      </div>
+    </nav>
+  )
+}

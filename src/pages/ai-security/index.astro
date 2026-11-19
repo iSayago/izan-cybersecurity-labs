@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { researchLines, researchPrinciples } from '../../data/ai-security';
+import { formatDate, getResearch, readingTime, researchPath } from '../../lib/content';
+import { withBase } from '../../lib/url';
+
+const entries = await getResearch();
+const published = entries.filter((entry) => entry.data.status === 'published').length;
+---
+
+<BaseLayout
+  title="AI Security"
+  description="Línea de investigación en preparación sobre seguridad defensiva y ofensiva de sistemas de inteligencia artificial. Sin proyectos ficticios."
+>
+  <header class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">AI Security / Research track</p>
+      <h1 class="page-title">Seguridad de la IA,<br /><em>sin atajos.</em></h1>
+      <p class="page-lede">
+        Sección preparada para investigaciones defensivas y ofensivas sobre sistemas
+        de inteligencia artificial. Todavía no hay publicaciones: no se crearán
+        proyectos de ejemplo atribuidos a Izan.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat">
+          <strong>{String(entries.length).padStart(2, '0')}</strong>
+          <span>Publicaciones</span>
+        </div>
+        <div class="stat">
+          <strong>{String(researchLines.length).padStart(2, '0')}</strong>
+          <span>Líneas previstas</span>
+        </div>
+        <div class="stat">
+          <strong>{String(researchPrinciples.length).padStart(2, '0')}</strong>
+          <span>Principios</span>
+        </div>
+        <div class="stat">
+          <strong>2026</strong>
+          <span>Inicio del archivo</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section" aria-labelledby="ai-status-title">
+    <div class="wrap">
+      <div class="ai-status">
+        <div>
+          <p class="micro-label">Estado de la sección</p>
+          <h2 id="ai-status-title">Preparada, pero todavía sin resultados.</h2>
+          <p>
+            La estructura está lista para publicar notas, experimentos y papers. El
+            contenido aparecerá cuando exista trabajo verificable: un alcance, un
+            método, unas evidencias y unos límites declarados. La ausencia de
+            publicaciones es intencionada, no un hueco que deba rellenarse con ficción.
+          </p>
+          <a class="link-arrow mt-5" href={withBase('/about/#formacion')}>
+            Método de documentación <Icon name="arrow-up-right" size={12} />
+          </a>
+        </div>
+
+        <div class="ai-status-grid" aria-label="Resumen de la sección">
+          <div>
+            <strong>00</strong>
+            <span>Proyectos ficticios</span>
+          </div>
+          <div>
+            <strong>{String(published).padStart(2, '0')}</strong>
+            <span>Investigaciones publicadas</span>
+          </div>
+          <div>
+            <strong>DEF</strong>
+            <span>Enfoque prioritario</span>
+          </div>
+          <div>
+            <strong>OFF</strong>
+            <span>Investigación controlada</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="principles-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-index" aria-hidden="true">01</span>
+        <div class="section-head-copy">
+          <h2 class="section-title" id="principles-title">Principios de la línea</h2>
+          <p class="section-desc">
+            Reglas para que una investigación ofensiva no se convierta en una
+            demostración sin consecuencias defensivas.
+          </p>
+        </div>
+      </div>
+
+      <div class="principle-grid">
+        {researchPrinciples.map((principle) => (
+          <div class="formation-panel">
+            <div class="formation-head">
+              <span class="micro-label">Principio {principle.index}</span>
+              <span class="badge badge-module badge-no-dot">AI / SEC</span>
+            </div>
+            <h3 class="formation-title">{principle.title}</h3>
+            <p class="formation-note">{principle.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="lines-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-index" aria-hidden="true">02</span>
+        <div class="section-head-copy">
+          <h2 class="section-title" id="lines-title">Líneas previstas</h2>
+          <p class="section-desc">
+            Temas de estudio, no proyectos en curso. No hay resultados, métricas ni
+            repositorios asociados porque todavía no existen.
+          </p>
+        </div>
+      </div>
+
+      <div class="research-grid">
+        {researchLines.map((line, index) => (
+          <article class="research-card">
+            <div class="research-card-top">
+              <span class="research-index">L{String(index + 1).padStart(2, '0')}</span>
+              <span class="research-focus">Foco {line.focus}</span>
+            </div>
+            <h3>{line.title}</h3>
+            <p>{line.description}</p>
+            <ul class="chip-row" aria-label="Temas previstos">
+              {line.topics.map((topic) => <li class="tag">{topic}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+
+      <p class="legend-line">
+        <span class="badge badge-pending badge-no-dot">Planificado</span>
+        <span>
+          Ninguna de estas líneas se presenta como trabajo realizado. La sección se
+          actualizará cuando haya una investigación publicable.
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="publicaciones" aria-labelledby="publications-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-index" aria-hidden="true">03</span>
+        <div class="section-head-copy">
+          <h2 class="section-title" id="publications-title">Publicaciones</h2>
+          <p class="section-desc">
+            Notas, experimentos y papers de la colección <code>content/ai-security</code>.
+            El listado se genera automáticamente.
+          </p>
+        </div>
+      </div>
+
+      {entries.length > 0 ? (
+        <div class="lab-grid">
+          {entries.map((entry) => (
+            <article class="card">
+              <div class="card-body">
+                <div class="card-kicker">
+                  <span class="accent">{entry.data.type}</span>
+                  <span>{formatDate(entry.data.date)}</span>
+                </div>
+                <h3 class="card-title">
+                  <a class="stretched-link" href={withBase(researchPath(entry))}>{entry.data.title}</a>
+                </h3>
+                <p class="card-desc">{entry.data.description}</p>
+                <div class="card-foot">
+                  <StatusBadge status={entry.data.status} />
+                  <span>{readingTime(entry.body)} min</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="ai-empty">
+          <p class="micro-label">Publicaciones / 00</p>
+          <h3>Sin investigaciones publicadas todavía.</h3>
+          <p>
+            Cuando exista una investigación con alcance, método y evidencia, aparecerá
+            aquí. No se publican proyectos de ejemplo ni resultados simulados como si
+            fueran trabajo propio.
+          </p>
+          <p class="mt-3 text-[var(--color-muted)]">
+            La sección permanece vacía de forma deliberada.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

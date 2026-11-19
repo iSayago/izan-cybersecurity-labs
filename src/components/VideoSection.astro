@@ -1,0 +1,71 @@
+---
+import type { VideoData } from '../lib/media';
+import Icon from './Icon.astro';
+import VideoEmbed from './VideoEmbed.astro';
+
+interface Props {
+  original?: VideoData;
+  summary?: VideoData;
+  showPending?: boolean;
+}
+
+const { original, summary, showPending = false } = Astro.props;
+const shouldRender = Boolean(original || summary || showPending);
+---
+
+{shouldRender && (
+<section class="report-section" aria-labelledby="video-title">
+  <div class="report-section-head">
+    <h2 id="video-title" class="report-section-title">Registro audiovisual</h2>
+    <span class="report-section-index">VIDEO / 16:9 + 9:16</span>
+  </div>
+
+  <div class="video-pair">
+    <figure class="video-card">
+      <div class="video-card-head">
+        <span><b>Grabación original</b></span>
+        <span>16:9 · práctica completa</span>
+      </div>
+      <div class="video-frame">
+        {
+          original ? (
+            <VideoEmbed video={original} fallbackLabel="Grabación original de la práctica" />
+          ) : (
+            <div class="video-empty">
+              <Icon name="video" size={24} />
+              <span>Sin grabación original publicada</span>
+              <small>No se muestra un vídeo ficticio. Se añadirá cuando exista la práctica real.</small>
+            </div>
+          )
+        }
+      </div>
+      <figcaption class="video-caption">
+        <b>Registro completo.</b> Vídeo alojado externamente; el repositorio no almacena archivos pesados.
+      </figcaption>
+    </figure>
+
+    <figure class="video-card">
+      <div class="video-card-head">
+        <span><b>Resumen vertical</b></span>
+        <span>9:16 · LinkedIn</span>
+      </div>
+      <div class="video-frame video-frame-vertical">
+        {
+          summary ? (
+            <VideoEmbed video={summary} vertical fallbackLabel="Resumen vertical de la práctica" />
+          ) : (
+            <div class="video-empty">
+              <Icon name="video" size={24} />
+              <span>Resumen 9:16 pendiente</span>
+              <small>Pieza breve de 15–20 s para compartir. Solo se publicará desde material real.</small>
+            </div>
+          )
+        }
+      </div>
+      <figcaption class="video-caption">
+        <b>Resumen de 15–20 s.</b> Títulos, transiciones y voz sobre la práctica documentada.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+)}

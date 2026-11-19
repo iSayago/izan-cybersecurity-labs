@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="IZAN Cybersecurity Labs">
+  <rect width="64" height="64" fill="#070b11"/>
+  <rect x="0.5" y="0.5" width="63" height="63" fill="none" stroke="#1c2937"/>
+  <g fill="none" stroke="#56dce8" stroke-width="2.2" stroke-linecap="square">
+    <path d="M20 15h-8v34h8"/>
+    <path d="M44 15h8v34h-8"/>
+    <path d="M23 45 41 19" opacity="0.55"/>
+  </g>
+  <circle cx="42" cy="45" r="3" fill="#56dce8"/>
+</svg>

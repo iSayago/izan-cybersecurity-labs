@@ -1,0 +1,113 @@
+---
+import '../styles/global.css';
+import '../styles/social.css';
+import { site, socialLinks } from '../data/site';
+import { withBase } from '../lib/url';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  type?: 'website' | 'article' | 'profile';
+  publishedTime?: string;
+  modifiedTime?: string;
+  tags?: string[];
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+  canonical?: string | false;
+  showProgress?: boolean;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  image,
+  imageAlt,
+  noindex = false,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  tags,
+  jsonLd,
+  canonical,
+  showProgress = false,
+  bodyClass = '',
+} = Astro.props;
+
+const siteUrl = Astro.site ?? new URL('http://localhost:4321');
+const baseJsonLd: Array<Record<string, unknown>> = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: site.title,
+    url: siteUrl.toString(),
+    inLanguage: 'es',
+    description: site.description,
+    author: {
+      '@type': 'Person',
+      name: site.author,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: site.author,
+    url: new URL(withBase('/about/'), siteUrl).toString(),
+    description:
+      'Analista en formación orientado a SOC Operations, Blue Team y documentación técnica de laboratorios.',
+    knowsAbout: [
+      'SOC Operations',
+      'Blue Team',
+      'Incident Triage',
+      'Log Management',
+      'Digital Forensics and Incident Response',
+    ],
+    ...(socialLinks.length > 0
+      ? { sameAs: socialLinks.filter((link) => !link.href.startsWith('mailto:')).map((link) => link.href) }
+      : {}),
+  },
+];
+
+const structuredData = [
+  ...baseJsonLd,
+  ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []),
+];
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      imageAlt={imageAlt}
+      noindex={noindex}
+      type={type}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      tags={tags}
+      jsonLd={structuredData}
+      canonical={canonical}
+    />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <Header showProgress={showProgress} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '../scripts/ui';
+    </script>
+  </body>
+</html>

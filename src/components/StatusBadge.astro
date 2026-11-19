@@ -1,0 +1,16 @@
+---
+import { statusMeta, type ContentStatus } from '../lib/content';
+
+interface Props {
+  status: ContentStatus;
+  label?: string;
+}
+
+const { status, label } = Astro.props;
+const meta = statusMeta[status];
+---
+
+<span
+  class:list={['badge', `badge-${meta.tone}`]}
+  title={meta.description}
+>{label ?? meta.label}</span>

@@ -1,0 +1,363 @@
+﻿---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Icon from '../components/Icon.astro';
+import SectionHead from '../components/SectionHead.astro';
+import SocialLinks from '../components/SocialLinks.astro';
+import { socialLinks, site } from '../data/site';
+import { countByStatus, getLabs, getPosts, getResearch } from '../lib/content';
+import { withBase } from '../lib/url';
+
+const labs = await getLabs();
+const posts = await getPosts();
+const research = await getResearch();
+const counts = countByStatus(labs);
+const siteUrl = Astro.site ?? new URL('http://localhost:4321');
+const buildDate = new Intl.DateTimeFormat('es-ES', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date());
+
+const profileJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: site.author,
+    description:
+      'Analista en formación orientado a SOC Operations y Blue Team. Documenta laboratorios de ciberseguridad con evidencia verificable.',
+    url: new URL(withBase('/about/'), siteUrl).toString(),
+    knowsAbout: [
+      'SOC Operations',
+      'Blue Team',
+      'Incident Triage',
+      'Log Management',
+      'Digital Forensics',
+      'AI Security',
+    ],
+    ...(socialLinks.length > 0
+      ? {
+          sameAs: socialLinks
+            .filter((link) => !link.href.startsWith('mailto:'))
+            .map((link) => link.href),
+        }
+      : {}),
+  },
+};
+
+const areas = [
+  {
+    title: 'SOC Operations',
+    body: 'Monitorización, análisis de eventos y triage.',
+    state: 'Enfoque actual',
+    tone: '',
+  },
+  {
+    title: 'Blue Team',
+    body: 'Detección, respuesta y documentación.',
+    state: 'Enfoque actual',
+    tone: '',
+  },
+  {
+    title: 'DFIR',
+    body: 'Forense digital y análisis de malware.',
+    state: 'En formación',
+    tone: 'area-state-muted',
+  },
+  {
+    title: 'Pentesting',
+    body: 'Ampliación ofensiva del perfil.',
+    state: 'Previsto',
+    tone: 'area-state-future',
+  },
+  {
+    title: 'AI Security',
+    body: 'Investigación defensiva y ofensiva.',
+    state: 'Previsto',
+    tone: 'area-state-future',
+  },
+];
+
+const method = [
+  {
+    title: 'Escribir mientras se trabaja',
+    body: 'El objetivo, las dudas y las consultas se registran durante la práctica. Al final solo quedan las conclusiones y se pierde el razonamiento.',
+  },
+  {
+    title: 'Separar observación de interpretación',
+    body: 'Una cosa es lo que muestra el log y otra lo que se deduce de él. El informe distingue ambas y evita presentar una hipótesis como un hecho.',
+  },
+  {
+    title: 'Conservar la evidencia',
+    body: 'Capturas con contexto, consultas completas y fragmentos de registro citables. Si una imagen no se puede revisar, no sostiene una conclusión.',
+  },
+  {
+    title: 'Declarar límites y estado',
+    body: 'Qué no se ha podido comprobar, qué es sintético y qué secciones faltan. La cobertura documental se muestra en cada informe.',
+  },
+];
+---
+
+<BaseLayout
+  title="About"
+  description="Perfil profesional de Izan: formación SOC Analyst (CSA), áreas de interés, método de documentación y contacto. Sin experiencia ni certificaciones inventadas."
+  type="profile"
+  jsonLd={profileJsonLd}
+>
+  <header class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">About / Perfil profesional</p>
+      <h1 class="page-title">Sobre <em>este archivo.</em></h1>
+      <p class="page-lede">
+        No es una página de servicios. Es el contexto de un portfolio técnico:
+        formación, áreas de interés y una forma concreta de documentar el trabajo.
+      </p>
+      <p class="page-meta">
+        <span>SOC Operations · Blue Team</span>
+        <span>EC-Council CSA · En curso</span>
+        <span>{site.course.labsCompleted} prácticas realizadas</span>
+        <span>Actualizado {buildDate}</span>
+      </p>
+    </div>
+  </header>
+
+  <section class="section" id="perfil" aria-labelledby="perfil-title">
+    <div class="wrap about-grid">
+      <div class="about-bio">
+        <h2 class="sr-only" id="perfil-title">Perfil</h2>
+        <p>
+          <strong>Soy Izan.</strong> Estoy construyendo mi recorrido profesional en
+          ciberseguridad desde la práctica documentada. Actualmente curso el programa
+          SOC Analyst (CSA) de EC-Council y utilizo este archivo para registrar
+          laboratorios con objetivo, procedimiento, evidencia y conclusiones.
+        </p>
+        <p>
+          Mi enfoque inmediato es <strong>SOC Operations y Blue Team</strong>:
+          monitorización, análisis de eventos, triage y respuesta. No presento
+          experiencia laboral que no tengo ni certificaciones que no se hayan emitido.
+          Lo que aparece aquí debe poder revisarse.
+        </p>
+        <p>
+          Este portfolio no vende servicios. Es una herramienta de trabajo y una forma
+          de que un evaluador técnico compruebe qué se ha hecho, cómo y con qué límites.
+        </p>
+
+        <blockquote class="about-pull">
+          “Si no puedo explicar el procedimiento y señalar la evidencia, no lo publico.”
+        </blockquote>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href={withBase('/labs/')}>
+            Explorar el archivo <Icon name="arrow-right" size={13} />
+          </a>
+          <a class="btn btn-ghost" href={withBase('/blog/demo-documentar-un-laboratorio/')}>
+            Método de trabajo <Icon name="arrow-up-right" size={13} />
+          </a>
+        </div>
+      </div>
+
+      <aside class="id-card" aria-label="Ficha de perfil">
+        <div class="id-card-head">
+          <span>Profile / ID</span>
+          <span>{site.startYear}</span>
+        </div>
+        <div class="id-mark">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true">
+            <path d="M12 9H7v22h5M28 9h5v22h-5"></path>
+            <path d="M14.5 27 25.5 13" opacity="0.55"></path>
+            <circle cx="26" cy="27" r="1.9" fill="currentColor" stroke="none"></circle>
+          </svg>
+          <div>
+            <p class="id-name">IZAN</p>
+            <p class="id-role">SOC Operations / Blue Team</p>
+          </div>
+        </div>
+        <dl class="id-rows">
+          <div class="id-row">
+            <dt>Formación</dt>
+            <dd>EC-Council CSA</dd>
+          </div>
+          <div class="id-row">
+            <dt>Estado</dt>
+            <dd>En curso</dd>
+          </div>
+          <div class="id-row">
+            <dt>Prácticas</dt>
+            <dd>{site.course.labsCompleted} realizadas</dd>
+          </div>
+          <div class="id-row">
+            <dt>Informes</dt>
+            <dd>{counts.published} publicados</dd>
+          </div>
+          <div class="id-row">
+            <dt>Demos</dt>
+            <dd>{counts.demo} de formato</dd>
+          </div>
+          <div class="id-row">
+            <dt>Interés</dt>
+            <dd>DFIR · Pentesting · AI Security</dd>
+          </div>
+        </dl>
+        {socialLinks.length > 0 && (
+          <div class="id-links">
+            <SocialLinks showHandles />
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="formacion" aria-labelledby="formacion-title">
+    <div class="wrap">
+      <SectionHead
+        index="01"
+        id="formacion-title"
+        title="Formación"
+        description="El progreso del curso y la publicación del archivo son dos cosas distintas. Esta sección describe la formación; los estados de cada informe viven en SOC Labs."
+        link={withBase('/labs/#estado')}
+        linkLabel="Estado del archivo"
+      />
+
+      <div class="about-two-col">
+        <div class="timeline">
+          <div class="timeline-item">
+            <p class="timeline-date">2026 · Formación en curso</p>
+            <h3 class="timeline-title">EC-Council — SOC Analyst (CSA)</h3>
+            <p class="timeline-desc">
+              Recorrido de módulos 02–08 sobre amenazas, gestión de logs, detección,
+              respuesta, forense y SOC en cloud. Los títulos se mantienen en su idioma
+              original.
+            </p>
+          </div>
+          <div class="timeline-item">
+            <p class="timeline-date">Prácticas realizadas · {site.course.labsCompleted}</p>
+            <h3 class="timeline-title">Trabajo de laboratorio</h3>
+            <p class="timeline-desc">
+              {site.course.note}
+            </p>
+          </div>
+          <div class="timeline-item">
+            <p class="timeline-date">Publicaciones · {counts.published}</p>
+            <h3 class="timeline-title">Archivo público</h3>
+            <p class="timeline-desc">
+              Ningún resultado se publica sin revisión. Las secciones incompletas se
+              muestran como pendientes y el contenido de demostración se etiqueta como
+              DEMO.
+            </p>
+          </div>
+          <div class="timeline-item">
+            <p class="timeline-date">Próximo · Previsto</p>
+            <h3 class="timeline-title">Pentesting y AI Security</h3>
+            <p class="timeline-desc">
+              Líneas futuras del perfil. No forman parte del archivo actual y no se
+              presentan como experiencia adquirida.
+            </p>
+          </div>
+        </div>
+
+        <div class="tool-note">
+          <p class="micro-label">Lo que no vas a encontrar</p>
+          <ul class="integrity-list">
+            <li>Experiencia laboral que no haya existido.</li>
+            <li>Certificaciones que no se hayan emitido.</li>
+            <li>Capturas o resultados de prácticas no realizadas.</li>
+            <li>Proyectos de AI Security ficticios para rellenar la sección.</li>
+            <li>Clientes, credenciales o datos personales.</li>
+          </ul>
+          <p class="mt-5">
+            La sección <a class="link" href={withBase('/labs/#estado')}>SOC Labs</a>
+            documenta el estado real de cada módulo y de cada informe.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="areas-title">
+    <div class="wrap">
+      <SectionHead
+        index="02"
+        id="areas-title"
+        title="Áreas de interés"
+        description="El foco cambia con el recorrido. Las áreas futuras se marcan como tales."
+      />
+
+      <div class="area-grid">
+        {areas.map((area) => (
+          <div class="area-card">
+            <h3>{area.title}</h3>
+            <p>{area.body}</p>
+            <span class:list={['area-state', area.tone]}>{area.state}</span>
+          </div>
+        ))}
+      </div>
+
+      <div class="tool-note mt-6">
+        <p class="micro-label">Herramientas</p>
+        <p class="mt-2">
+          No hay una lista abstracta de herramientas o “skills”. Cada informe enumera
+          únicamente las que se han utilizado en esa práctica, con su función concreta.
+          Si una herramienta no aparece en un informe, no se ha usado.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="method-title">
+    <div class="wrap">
+      <SectionHead
+        index="03"
+        id="method-title"
+        title="Método de documentación"
+        description="Cuatro decisiones que aplican a cualquier informe del archivo."
+      />
+
+      <div class="about-two-col">
+        <div class="principle-list">
+          {method.map((item, index) => (
+            <div class="principle">
+              <span class="principle-index">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="tool-note">
+          <p class="micro-label">Estado actual del archivo</p>
+          <div class="stat-panel mt-3">
+            <div>
+              <p class="id-name text-[1.3rem]">{counts.total}</p>
+              <p class="micro-label mt-1">Registros de práctica</p>
+            </div>
+            <div>
+              <p class="id-name text-[1.3rem]">{counts.published}</p>
+              <p class="micro-label mt-1">Informes publicados</p>
+            </div>
+            <div>
+              <p class="id-name text-[1.3rem]">{counts.demo}</p>
+              <p class="micro-label mt-1">Demos de formato</p>
+            </div>
+            <div>
+              <p class="id-name text-[1.3rem]">{posts.length + research.length}</p>
+              <p class="micro-label mt-1">Notas e investigaciones</p>
+            </div>
+          </div>
+          <p class="mt-4">
+            Un registro DEMO no cuenta como práctica publicada. Un informe pendiente
+            tampoco. Los contadores reflejan el estado de la web, no el avance del curso.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <ContactBlock />
+  </div>
+</BaseLayout>
+

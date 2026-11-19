@@ -1,0 +1,31 @@
+---
+import { socialLinks } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+  showHandles?: boolean;
+  stacked?: boolean;
+}
+
+const { class: className = '', showHandles = false, stacked = false } = Astro.props;
+---
+
+{socialLinks.length > 0 && (
+  <ul class:list={['social-list', stacked && 'social-list-stacked', className]}>
+    {socialLinks.map((link) => (
+      <li>
+        <a
+          class="social-link"
+          href={link.href}
+          target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+          rel={link.href.startsWith('mailto:') ? undefined : 'noreferrer noopener'}
+        >
+          <Icon name={link.icon} size={15} />
+          <span>{link.label}</span>
+          {showHandles && link.handle && <span class="social-handle">{link.handle}</span>}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
