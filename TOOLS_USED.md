@@ -132,9 +132,9 @@ los laboratorios. Los informes se redactaron a partir de lo que aparece en las g
   del instructor.
 - El panel de instrucciones del curso no se incluye en las capturas publicables: las
   evidencias están recortadas al área de la máquina.
-- Los vídeos editados y los resúmenes se han preparado en local. No se han subido a
-  ninguna plataforma ni se han enlazado desde la web.
-- Las URLs de los vídeos quedan pendientes de alojamiento externo y de la revisión de
-  permisos de distribución del material del curso.
+- Los vídeos editados y los resúmenes están alojados en el repositorio público
+  `iSayago/izan-cybersecurity-media` (GitHub Pages) y enlazados desde las fichas.
+- El repositorio de medios usa HTTPS y responde con `Content-Type: video/mp4` y
+  `Accept-Ranges: bytes`; la web mantiene los MP4 fuera del repositorio del portfolio.
 - La pista de audio de Lab 1 es silencio digital; añadir música o voz requeriría una
   producción posterior y no se ha hecho para no presentar como original algo que no lo es.

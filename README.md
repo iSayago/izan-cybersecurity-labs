@@ -15,10 +15,10 @@ qué sigue pendiente**. No es una landing de servicios ni una plantilla de marke
   servicios de pago obligatorios.
 
 > **Laboratorios 1 y 2.** Este árbol incluye 10 informes de los Laboratorios 1 y 2
-> (6 + 4 ejercicios), sus evidencias y sus metadatos. Los informes están integrados y se
-> publican con `status: published`; los MP4 editados y los resúmenes verticales están en
-> `media-work/videos/`, fuera de Git, a la espera de alojamiento externo. Ver
-> `TOOLS_USED.md` y `VIDEO_HOSTING.md`.
+> (6 + 4 ejercicios), sus evidencias y sus metadatos. Los informes están publicados con
+> `status: published`. Los MP4 editados y los resúmenes verticales están alojados en el
+> repositorio público **`iSayago/izan-cybersecurity-media`** y enlazados desde cada ficha.
+> Ver `TOOLS_USED.md` y `VIDEO_HOSTING.md`.
 
 [![Deploy to GitHub Pages](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml/badge.svg)](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml)
 

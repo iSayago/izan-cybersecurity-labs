@@ -1,14 +1,22 @@
 # Alojamiento de los vídeos
 
-Los vídeos están preparados en local, dentro de:
+Los vídeos están publicados en el repositorio público:
 
 ```text
-media-work/videos/
+https://github.com/iSayago/izan-cybersecurity-media
 ```
 
-No se han subido a ninguna plataforma ni se han enlazado desde la web. El material proviene
-de una grabación de laboratorio del programa CSA; antes de publicarlo hay que confirmar que
-su distribución está permitida.
+y servidos por GitHub Pages en:
+
+```text
+https://isayago.github.io/izan-cybersecurity-media/
+```
+
+Los archivos están en `media/` y las prácticas apuntan a URLs directas con
+`Content-Type: video/mp4` y soporte de rangos.
+
+La copia de trabajo local está en `media-work/videos/`. El repositorio del portfolio no
+contiene los MP4; `media-publish/` está ignorado por Git.
 
 ## Archivos preparados
 
@@ -35,25 +43,28 @@ Características:
   redactada.
 - Los textos de los resúmenes describen resultados observados, no resultados inventados.
 
-## Recomendación de publicación
+## Actualización de URLs
 
-1. Revisar los permisos de distribución del material del curso.
-2. Subir los editados a YouTube (no listado) o Vimeo.
-3. Subir los resúmenes verticales a YouTube Shorts o Vimeo, o publicarlos directamente en
-   LinkedIn como vídeo nativo.
-4. Copiar las URLs públicas en el frontmatter de la práctica correspondiente:
+La base pública es:
+
+```text
+https://isayago.github.io/izan-cybersecurity-media/media/
+```
+
+Cada práctica ya incluye `originalVideo` y `summaryVideo` en su frontmatter. Si se reemplaza
+un MP4, mantén el mismo nombre o actualiza la URL correspondiente:
 
 ```yaml
 originalVideo:
-  url: "https://www.youtube.com/watch?v=XXXXXXXXXXX"
-  title: "Grabación editada · Laboratorio 1"
+  url: "https://isayago.github.io/izan-cybersecurity-media/media/lab1-p01-sql-injection-edited.mp4"
+  title: "Grabación editada · SQL Injection en LuxuryTreats"
 summaryVideo:
-  url: "https://vimeo.com/XXXXXXXXX"
-  title: "Resumen vertical · Laboratorio 1"
+  url: "https://isayago.github.io/izan-cybersecurity-media/media/lab1-p01-sql-injection-summary.mp4"
+  title: "Resumen vertical 9:16 · SQL Injection en LuxuryTreats"
 ```
 
-5. Ejecutar `npm run build` y revisar el reproductor antes de desplegar.
-6. No subir los MP4 pesados al repositorio. `media-work/` está ignorado por Git.
+Después de cambiar un vídeo, ejecuta `npm run build` y revisa el reproductor antes de
+desplegar. No subas los MP4 al repositorio del portfolio.
 
 ## Nota de autenticidad
 

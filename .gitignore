@@ -36,3 +36,6 @@ build-*.log
 
 # source recordings and working media (never commit heavy files)
 media-work/
+
+# local clone of the public media repository (never commit the MP4s here)
+media-publish/
