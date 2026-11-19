@@ -5,12 +5,10 @@ import Icon from '../components/Icon.astro';
 import SectionHead from '../components/SectionHead.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 import { socialLinks, site } from '../data/site';
-import { countByStatus, getLabs, getPosts, getResearch } from '../lib/content';
+import { countByStatus, getLabs } from '../lib/content';
 import { withBase } from '../lib/url';
 
 const labs = await getLabs();
-const posts = await getPosts();
-const research = await getResearch();
 const counts = countByStatus(labs);
 const siteUrl = Astro.site ?? new URL('http://localhost:4321');
 const buildDate = new Intl.DateTimeFormat('es-ES', {
@@ -34,8 +32,8 @@ const profileJsonLd = {
       'Blue Team',
       'Incident Triage',
       'Log Management',
-      'Digital Forensics',
-      'AI Security',
+      'Threat Detection',
+      'Network Security',
     ],
     ...(socialLinks.length > 0
       ? {
@@ -69,12 +67,6 @@ const areas = [
   {
     title: 'Pentesting',
     body: 'Ampliación ofensiva del perfil.',
-    state: 'Previsto',
-    tone: 'area-state-future',
-  },
-  {
-    title: 'AI Security',
-    body: 'Investigación defensiva y ofensiva.',
     state: 'Previsto',
     tone: 'area-state-future',
   },
@@ -152,7 +144,7 @@ const method = [
           <a class="btn btn-primary" href={withBase('/labs/')}>
             Explorar el archivo <Icon name="arrow-right" size={13} />
           </a>
-          <a class="btn btn-ghost" href={withBase('/blog/demo-documentar-un-laboratorio/')}>
+          <a class="btn btn-ghost" href={withBase('/about/#method-title')}>
             Método de trabajo <Icon name="arrow-up-right" size={13} />
           </a>
         </div>
@@ -192,12 +184,8 @@ const method = [
             <dd>{counts.published} publicados</dd>
           </div>
           <div class="id-row">
-            <dt>Demos</dt>
-            <dd>{counts.demo} de formato</dd>
-          </div>
-          <div class="id-row">
             <dt>Interés</dt>
-            <dd>DFIR · Pentesting · AI Security</dd>
+            <dd>SOC Operations · Log Management</dd>
           </div>
         </dl>
         {socialLinks.length > 0 && (
@@ -215,9 +203,9 @@ const method = [
         index="01"
         id="formacion-title"
         title="Formación"
-        description="El progreso del curso y la publicación del archivo son dos cosas distintas. Esta sección describe la formación; los estados de cada informe viven en SOC Labs."
-        link={withBase('/labs/#estado')}
-        linkLabel="Estado del archivo"
+        description="Formación actual y trabajo de laboratorio documentado en este archivo."
+        link={withBase('/labs/')}
+        linkLabel="Ver SOC Labs"
       />
 
       <div class="about-two-col">
@@ -242,14 +230,14 @@ const method = [
             <p class="timeline-date">Publicaciones · {counts.published}</p>
             <h3 class="timeline-title">Archivo público</h3>
             <p class="timeline-desc">
-              Ningún resultado se publica sin revisión. Las secciones incompletas se
-              muestran como pendientes y el contenido de demostración se etiqueta como
-              DEMO.
+              Cada práctica publicada incluye objetivo, procedimiento, evidencias,
+              análisis y registro audiovisual. No se publican secciones vacías ni
+              resultados que no estén respaldados por el material del laboratorio.
             </p>
           </div>
           <div class="timeline-item">
             <p class="timeline-date">Próximo · Previsto</p>
-            <h3 class="timeline-title">Pentesting y AI Security</h3>
+            <h3 class="timeline-title">DFIR y Pentesting</h3>
             <p class="timeline-desc">
               Líneas futuras del perfil. No forman parte del archivo actual y no se
               presentan como experiencia adquirida.
@@ -263,12 +251,12 @@ const method = [
             <li>Experiencia laboral que no haya existido.</li>
             <li>Certificaciones que no se hayan emitido.</li>
             <li>Capturas o resultados de prácticas no realizadas.</li>
-            <li>Proyectos de AI Security ficticios para rellenar la sección.</li>
+            <li>Secciones vacías o de relleno para aparentar volumen.</li>
             <li>Clientes, credenciales o datos personales.</li>
           </ul>
           <p class="mt-5">
-            La sección <a class="link" href={withBase('/labs/#estado')}>SOC Labs</a>
-            documenta el estado real de cada módulo y de cada informe.
+            La sección <a class="link" href={withBase('/labs/')}>SOC Labs</a>
+            documenta los módulos y las prácticas publicadas.
           </p>
         </div>
       </div>
@@ -332,24 +320,23 @@ const method = [
           <div class="stat-panel mt-3">
             <div>
               <p class="id-name text-[1.3rem]">{counts.total}</p>
-              <p class="micro-label mt-1">Registros de práctica</p>
+              <p class="micro-label mt-1">Prácticas documentadas</p>
             </div>
             <div>
               <p class="id-name text-[1.3rem]">{counts.published}</p>
               <p class="micro-label mt-1">Informes publicados</p>
             </div>
             <div>
-              <p class="id-name text-[1.3rem]">{counts.demo}</p>
-              <p class="micro-label mt-1">Demos de formato</p>
+              <p class="id-name text-[1.3rem]">02</p>
+              <p class="micro-label mt-1">Módulos documentados</p>
             </div>
             <div>
-              <p class="id-name text-[1.3rem]">{posts.length + research.length}</p>
-              <p class="micro-label mt-1">Notas e investigaciones</p>
+              <p class="id-name text-[1.3rem]">20</p>
+              <p class="micro-label mt-1">Vídeos publicados</p>
             </div>
           </div>
           <p class="mt-4">
-            Un registro DEMO no cuenta como práctica publicada. Un informe pendiente
-            tampoco. Los contadores reflejan el estado de la web, no el avance del curso.
+            Todos los contadores corresponden a contenido publicado y revisado.
           </p>
         </div>
       </div>

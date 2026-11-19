@@ -6,7 +6,6 @@ interface Props {
   alt: string;
   caption: string;
   index?: string;
-  demo?: boolean;
   width?: number;
   height?: number;
 }
@@ -16,7 +15,6 @@ const {
   alt,
   caption,
   index = 'FIG.',
-  demo = false,
   width = 1200,
   height = 750,
 } = Astro.props;
@@ -31,6 +29,5 @@ const imageSrc = src.startsWith('/') ? withBase(src) : src;
   <figcaption>
     <span class="figure-index">{index}</span>
     <span>{caption}</span>
-    {demo && <span class="figure-demo">· Ilustración de demostración</span>}
   </figcaption>
 </figure>

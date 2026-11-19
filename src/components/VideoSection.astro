@@ -1,16 +1,14 @@
 ---
 import type { VideoData } from '../lib/media';
-import Icon from './Icon.astro';
 import VideoEmbed from './VideoEmbed.astro';
 
 interface Props {
   original?: VideoData;
   summary?: VideoData;
-  showPending?: boolean;
 }
 
-const { original, summary, showPending = false } = Astro.props;
-const shouldRender = Boolean(original || summary || showPending);
+const { original, summary } = Astro.props;
+const shouldRender = Boolean(original || summary);
 ---
 
 {shouldRender && (
@@ -27,20 +25,11 @@ const shouldRender = Boolean(original || summary || showPending);
         <span>16:9 · versión editada</span>
       </div>
       <div class="video-frame">
-        {
-          original ? (
-            <VideoEmbed video={original} fallbackLabel="Grabación editada de la práctica" />
-          ) : (
-            <div class="video-empty">
-              <Icon name="video" size={24} />
-              <span>Sin grabación original publicada</span>
-              <small>No se muestra un vídeo ficticio. Se añadirá cuando exista la práctica real.</small>
-            </div>
-          )
-        }
+        {original && <VideoEmbed video={original} fallbackLabel="Grabación editada de la práctica" />}
       </div>
       <figcaption class="video-caption">
-        <b>Registro editado.</b> Vídeo alojado externamente; el repositorio no almacena archivos pesados.
+        <b>Registro editado.</b> Cortes sobre la grabación del laboratorio; solo se
+        conservan las ejecuciones que terminaron correctamente.
       </figcaption>
     </figure>
 
@@ -50,20 +39,11 @@ const shouldRender = Boolean(original || summary || showPending);
         <span>9:16 · LinkedIn</span>
       </div>
       <div class="video-frame video-frame-vertical">
-        {
-          summary ? (
-            <VideoEmbed video={summary} vertical fallbackLabel="Resumen vertical de la práctica" />
-          ) : (
-            <div class="video-empty">
-              <Icon name="video" size={24} />
-              <span>Resumen 9:16 pendiente</span>
-              <small>Pieza breve de 15–20 s para compartir. Solo se publicará desde material real.</small>
-            </div>
-          )
-        }
+        {summary && <VideoEmbed video={summary} vertical fallbackLabel="Resumen vertical de la práctica" />}
       </div>
       <figcaption class="video-caption">
-        <b>Resumen de 15–20 s.</b> Títulos, transiciones y voz sobre la práctica documentada.
+        <b>Resumen de 15–20 s.</b> Rótulos y fragmentos de la misma grabación, sin
+        resultados añadidos.
       </figcaption>
     </figure>
   </div>

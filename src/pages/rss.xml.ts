@@ -1,32 +1,21 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
-import { getLabs, getPosts, labPath, postPath } from '../lib/content';
+import { getLabs, labPath } from '../lib/content';
 import { site } from '../data/site';
 import { withBase } from '../lib/url';
 
 export async function GET(context: APIContext) {
-  const [labs, posts] = await Promise.all([getLabs(), getPosts()]);
+  const labs = await getLabs();
 
-  const items = [
-    ...labs
-      .filter((entry) => entry.data.status === 'published')
-      .map((entry) => ({
-        title: entry.data.title,
-        description: entry.data.description,
-        pubDate: entry.data.date ?? new Date(),
-        link: withBase(labPath(entry)),
-        categories: ['SOC Lab', ...entry.data.categories],
-      })),
-    ...posts
-      .filter((entry) => entry.data.status === 'published')
-      .map((entry) => ({
-        title: entry.data.title,
-        description: entry.data.description,
-        pubDate: entry.data.date ?? new Date(),
-        link: withBase(postPath(entry)),
-        categories: [entry.data.category, ...entry.data.tags],
-      })),
-  ].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+  const items = labs
+    .map((entry) => ({
+      title: entry.data.title,
+      description: entry.data.description,
+      pubDate: entry.data.date ?? new Date(),
+      link: withBase(labPath(entry)),
+      categories: ['SOC Lab', ...entry.data.categories],
+    }))
+    .sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
   return rss({
     title: `${site.name} — Cybersecurity Labs`,

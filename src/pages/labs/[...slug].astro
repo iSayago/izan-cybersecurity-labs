@@ -2,9 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import ContentStatusNotice from '../../components/ContentStatusNotice.astro';
 import Icon from '../../components/Icon.astro';
-import PendingSections from '../../components/PendingSections.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import TagList from '../../components/TagList.astro';
@@ -39,11 +37,7 @@ const allLabs = await getLabs();
 const adjacent = adjacentLabs(entry, allLabs);
 const minutes = readingTime(entry.body);
 
-const isDemo = entry.data.status === 'demo';
-const isPending = entry.data.status === 'pending';
-const noindex = isDemo || isPending;
 const hasVideos = Boolean(entry.data.originalVideo || entry.data.summaryVideo);
-const showVideos = hasVideos || isDemo;
 const pageTitle = entry.data.title;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
 const siteUrl = Astro.site ?? new URL('http://localhost:4321');
@@ -103,7 +97,6 @@ const breadcrumbJsonLd = {
   description={entry.data.description}
   image={image}
   imageAlt={entry.data.coverAlt ?? pageTitle}
-  noindex={noindex}
   type="article"
   publishedTime={isoDate(entry.data.date)}
   modifiedTime={isoDate(entry.data.updated ?? entry.data.date)}
@@ -125,7 +118,6 @@ const breadcrumbJsonLd = {
         <StatusBadge status={entry.data.status} />
         <span class="badge badge-module">Módulo {entry.data.module}</span>
         <span class="badge badge-no-dot">Práctica {String(entry.data.practice).padStart(2, '0')}</span>
-        {noindex && <span class="badge badge-pending badge-no-dot">No indexada</span>}
       </div>
 
       <h1 class="report-title">{entry.data.title}</h1>
@@ -138,7 +130,7 @@ const breadcrumbJsonLd = {
         </div>
         <div>
           <dt>Módulo</dt>
-          <dd>{entry.data.module} / 08</dd>
+          <dd>{entry.data.module}</dd>
         </div>
         <div>
           <dt>Lectura</dt>
@@ -161,7 +153,7 @@ const breadcrumbJsonLd = {
             <Icon name="file" size={13} /> Documentación
           </a>
         )}
-        {showVideos && (
+        {hasVideos && (
           <a class="btn btn-ghost" href="#video-title">
             <Icon name="video" size={13} /> Registro audiovisual
           </a>
@@ -176,7 +168,6 @@ const breadcrumbJsonLd = {
 
     <div class="report-grid wrap">
       <div class="report-main">
-        <ContentStatusNotice status={entry.data.status} />
 
         {headings.length > 0 && (
           <details class="toc-mobile">
@@ -188,11 +179,10 @@ const breadcrumbJsonLd = {
           </details>
         )}
 
-        {showVideos && (
+        {hasVideos && (
           <VideoSection
             original={entry.data.originalVideo}
             summary={entry.data.summaryVideo}
-            showPending={isDemo}
           />
         )}
 
@@ -206,7 +196,6 @@ const breadcrumbJsonLd = {
           </div>
         </div>
 
-        <PendingSections missing={coverage.missing} total={coverage.total} demo={isDemo} />
 
         <nav class="report-pager" aria-label="Prácticas del mismo módulo">
           {adjacent.previous ? (
@@ -253,7 +242,7 @@ const breadcrumbJsonLd = {
             </div>
             <div class="fiche-row">
               <dt>Módulo</dt>
-              <dd>{entry.data.module} / 08</dd>
+              <dd>{entry.data.module}</dd>
             </div>
             <div class="fiche-row">
               <dt>Práctica</dt>
@@ -302,8 +291,7 @@ const breadcrumbJsonLd = {
         </div>
 
         <p class="aside-note">
-          Esta ficha se genera desde el frontmatter. Si algo no está documentado,
-          aparece como pendiente: no se rellena automáticamente.
+          Esta ficha se genera desde el frontmatter del informe.
         </p>
       </aside>
     </div>
