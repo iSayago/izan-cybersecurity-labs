@@ -15,8 +15,11 @@ const latest = labs.slice(0, 4);
 const courseModules = modules;
 
 const featured = labs.filter((entry) => entry.data.featured);
-const primary = featured[0] ?? labs[0];
-const stack = labs.filter((entry) => entry.id !== primary?.id).slice(0, 2);
+const ordered = [...labs].sort(
+  (a, b) => a.data.module.localeCompare(b.data.module) || a.data.practice - b.data.practice,
+);
+const primary = featured[0] ?? ordered[0];
+const stack = ordered.filter((entry) => entry.id !== primary?.id).slice(0, 2);
 const latestDate = latest[0]?.data.date;
 
 const principles = [
