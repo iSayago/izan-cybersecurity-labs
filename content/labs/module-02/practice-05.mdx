@@ -1,0 +1,110 @@
+---
+title: "Laboratorio 1 · Fuerza bruta FTP con Hydra"
+description: "Ataque de diccionario controlado contra el servicio FTP de 10.10.10.12 con Hydra y análisis del resultado obtenido."
+module: "02"
+practice: 5
+date: 2026-10-28
+updated: 2026-11-19
+categories:
+  - "Threat Analysis"
+  - "Credential Attacks"
+tags:
+  - "Hydra"
+  - "FTP"
+  - "Brute Force"
+  - "Dictionary Attack"
+  - "Credentials"
+tools:
+  - "Nmap 7.92"
+  - "Hydra 9.6"
+  - "FTP"
+  - "Ubuntu (máquina atacante)"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical se preparan en local y quedan pendientes de alojamiento externo y revisión de permisos antes de publicarse.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Comprobar la resistencia de una cuenta FTP de laboratorio frente a un ataque de diccionario y documentar los indicadores que genera en el servicio.
+
+## Contexto y entorno del laboratorio
+
+El objetivo es el servicio FTP del servidor `10.10.10.12`, identificado en el ejercicio de reconocimiento. La máquina atacante dispone de dos listas de laboratorio: `userlist.txt` y `pass.txt`, en `/root/Wordlist/`. La prueba se realiza en la red aislada del curso.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Nmap 7.92 | Confirmación del puerto FTP abierto |
+| Hydra 9.6 | Ataque de diccionario contra FTP |
+| FTP | Servicio objetivo del laboratorio |
+| Ubuntu | Máquina atacante |
+
+## Procedimiento realizado
+
+1. Se confirma que el puerto 21 está abierto:
+
+```bash
+nmap -p 21 10.10.10.12
+```
+
+2. Se ejecuta Hydra con las listas de usuarios y contraseñas del laboratorio:
+
+```bash
+hydra -L '/root/Wordlist/userlist.txt' -P '/root/Wordlist/pass.txt' ftp://10.10.10.12
+```
+
+3. Hydra prueba combinaciones y muestra una cuenta con credencial válida.
+4. El valor de la contraseña se redacta en la evidencia; no se reproduce en este informe.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-02/practice-05/lab1-hydra-command.webp",
+    "alt": "Comando Hydra contra el servicio FTP",
+    "caption": "Nmap confirma el puerto 21 y Hydra se ejecuta con las listas del laboratorio."
+  },
+  {
+    "src": "/images/labs/module-02/practice-05/lab1-hydra-success.webp",
+    "alt": "Hydra encuentra una credencial válida con la contraseña redactada",
+    "caption": "Hydra informa de una combinación válida; el valor de la contraseña está redactado."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+## Análisis de resultados
+
+**Observado:** Nmap confirma `21/tcp open ftp`. Hydra completa la prueba con 30 intentos de login y encuentra una combinación válida para la cuenta `Administrator`. La evidencia muestra el resultado y la contraseña se ha cubierto.
+
+**Interpretación:** el servicio FTP permite autenticación con contraseña y no aplica un bloqueo eficaz durante la prueba. Un ataque de diccionario explota contraseñas débiles o reutilizadas, no una vulnerabilidad del protocolo. FTP además transmite credenciales sin cifrar, lo que agrava el riesgo.
+
+Los IoCs incluyen múltiples respuestas de autenticación fallida, intentos repetidos desde una misma IP y un patrón de usuarios/contraseñas. En Windows, el ejercicio siguiente permite ver el evento 4625 con Logon Type 8; en Linux, los logs de `vsftpd` o del servicio equivalente serían la fuente principal.
+
+## Conclusiones
+
+La fortaleza de una contraseña no se mide por su apariencia, sino por su resistencia a un diccionario y por las protecciones del servicio. La práctica muestra la importancia de deshabilitar FTP en claro, aplicar límites de intentos, MFA cuando sea posible y revisar los logs de autenticación.
+
+## Aprendizajes
+
+- FTP en claro y contraseñas débiles convierten un servicio legítimo en un punto de entrada.
+- Los intentos repetidos deben correlacionarse con los eventos de autenticación del servidor.
+
+## Referencias
+
+- Hydra — [THC Hydra](https://github.com/vanhauser-thc/thc-hydra).
+- MITRE ATT&CK — [Brute Force (T1110)](https://attack.mitre.org/techniques/T1110/).
+- Nmap — [Port Scanning Techniques](https://nmap.org/book/man-port-scanning-techniques.html).

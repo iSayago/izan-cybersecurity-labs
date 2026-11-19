@@ -14,6 +14,13 @@ qué sigue pendiente**. No es una landing de servicios ni una plantilla de marke
 - **Contenido:** colecciones locales en `content/`, sin backend, sin base de datos y sin
   servicios de pago obligatorios.
 
+> **Rama de revisión de laboratorios.** Este árbol incluye 10 informes de los Laboratorios
+> 1 y 2 (6 + 4 ejercicios), sus evidencias y los metadatos. Están integrados en local con
+> `status: published` para poder validar el build, pero **no se han desplegado**: antes de
+> fusionar hay que revisar la exactitud y los permisos de publicación del material del
+> curso. Los MP4 editados y los resúmenes verticales están en `media-work/videos/`, fuera
+> de Git. Ver `TOOLS_USED.md` y `VIDEO_HOSTING.md`.
+
 [![Deploy to GitHub Pages](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml/badge.svg)](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml)
 
 ---
@@ -99,8 +106,12 @@ type-check y sirve solo para iterar el diseño.
 .
 ├─ content/
 │  ├─ labs/
-│  │  ├─ module-02/demo-01.mdx              # Demostración completa
-│  │  ├─ module-03/demo-01.md               # Demostración incompleta
+│  │  ├─ module-02/
+│  │  │  ├─ practice-01..06.mdx            # Laboratorio 1
+│  │  │  └─ demo-01.mdx                    # Demo en draft
+│  │  ├─ module-03/
+│  │  │  ├─ practice-01..04.mdx            # Laboratorio 2
+│  │  │  └─ demo-01.md                     # Demo en draft
 │  │  └─ module-04/plantilla-pendiente.md   # Hueco de práctica, sin datos
 │  ├─ blog/
 │  │  ├─ demo-documentar-un-laboratorio.md
@@ -429,8 +440,8 @@ marcados:
 
 | Archivo | Estado | Qué muestra |
 | --- | --- | --- |
-| `content/labs/module-02/demo-01.mdx` | `demo` | Informe completo, tablas, código, figuras, galería y vídeos pendientes |
-| `content/labs/module-03/demo-01.md` | `demo` | Cobertura parcial y panel de secciones pendientes |
+| `content/labs/module-02/demo-01.mdx` | `draft` | Informe de ejemplo; no se compila en esta rama |
+| `content/labs/module-03/demo-01.md` | `draft` | Cobertura parcial; no se compila en esta rama |
 | `content/labs/module-04/plantilla-pendiente.md` | `pending` | Página sin contenido, sin resultados inventados |
 | `content/blog/demo-documentar-un-laboratorio.md` | `demo` | Nota de método |
 | `content/blog/demo-plantilla-writeup.md` | `demo` | Plantilla editorial |

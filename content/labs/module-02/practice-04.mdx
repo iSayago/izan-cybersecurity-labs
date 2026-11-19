@@ -1,0 +1,101 @@
+---
+title: "Laboratorio 1 · DoS UDP con LOIC"
+description: "Generación controlada de una inundación UDP contra el servidor de laboratorio con LOIC y observación del flujo en Wireshark."
+module: "02"
+practice: 4
+date: 2026-10-28
+updated: 2026-11-19
+categories:
+  - "Threat Analysis"
+  - "Network Security"
+tags:
+  - "DoS"
+  - "LOIC"
+  - "UDP Flood"
+  - "Wireshark"
+  - "IoCs"
+tools:
+  - "LOIC 2.9.9"
+  - "Wireshark 4.4.0"
+  - "Windows Server 2022"
+  - "Ubuntu (máquina atacante)"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical se preparan en local y quedan pendientes de alojamiento externo y revisión de permisos antes de publicarse.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Comprender el efecto de una inundación UDP sobre un servicio web de laboratorio y reconocer los indicadores de compromiso que deja en la telemetría de red.
+
+## Contexto y entorno del laboratorio
+
+La máquina atacante Ubuntu ejecuta LOIC (Low Orbit Ion Cannon) contra el servidor `10.10.10.12`, que aloja LuxuryTreats en el puerto 80. La captura se realiza en la máquina Windows Server con Wireshark. Todo el tráfico permanece en la red aislada del laboratorio.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| LOIC 2.9.9 | Generación del flood UDP |
+| Wireshark 4.4.0 | Captura y lectura del tráfico en la interfaz del servidor |
+| Windows Server 2022 | Máquina donde se observa la captura |
+| Ubuntu | Máquina atacante |
+
+## Procedimiento realizado
+
+1. Se lanza LOIC desde la máquina atacante y se fija el objetivo `10.10.10.12`.
+2. Se selecciona el método **UDP**, puerto `80`, con 20 hilos y 25 sockets por hilo.
+3. Se inicia el flood y se observa el contador de peticiones de LOIC.
+4. Se cambia a la máquina Windows Server, se abre Wireshark y se captura tráfico en la interfaz `eth5`.
+5. Se detiene el flood y se analiza la captura: origen, destino, protocolo y tamaño de los paquetes.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-02/practice-04/lab1-loic-flood.webp",
+    "alt": "LOIC configurado contra 10.10.10.12 por UDP",
+    "caption": "LOIC con objetivo 10.10.10.12, método UDP, puerto 80 y 20 hilos."
+  },
+  {
+    "src": "/images/labs/module-02/practice-04/lab1-wireshark-udp.webp",
+    "alt": "Captura Wireshark del flujo UDP masivo",
+    "caption": "Wireshark muestra paquetes UDP de 10.10.10.56 hacia 10.10.10.12:80."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+## Análisis de resultados
+
+**Observado:** LOIC envía un volumen elevado de datagramas UDP al puerto 80. La captura de Wireshark muestra una secuencia continua de paquetes con origen `10.10.10.56`, destino `10.10.10.12`, protocolo UDP y puerto de destino 80. El contador de la captura supera los **699.000 paquetes**. La grabación documenta el flujo y la degradación del servicio; no se observa una caída total del sitio.
+
+**Interpretación:** se trata de una inundación volumétrica de capa 4. El servidor dedica recursos a procesar un flujo que no corresponde a peticiones HTTP legítimas. La repetición de paquetes de tamaño uniforme desde una única fuente es un indicador claro; en un entorno real habría que correlacionarlo con el volumen de entrada, la interfaz, las reglas de firewall y el estado del servicio.
+
+La captura también muestra el valor de tener telemetría antes, durante y después del incidente: sin ella, el síntoma sería únicamente "el sitio va lento".
+
+## Conclusiones
+
+Una denegación de servicio no siempre requiere un exploit: puede bastar con saturar un recurso. La práctica ayuda a distinguir el síntoma operativo de la evidencia de red y a formular detecciones basadas en tasa, tamaño, protocolo y origen. La mitigación debe combinar límites de tasa, filtrado, capacidad y monitorización.
+
+## Aprendizajes
+
+- Una denegación de servicio puede ser volumétrica y no necesitar un exploit de aplicación.
+- La tasa, el tamaño y el protocolo del flujo son más útiles que una única alerta aislada.
+
+## Referencias
+
+- MITRE ATT&CK — [Network Denial of Service (T1498)](https://attack.mitre.org/techniques/T1498/).
+- Wireshark — [User's Guide](https://www.wireshark.org/docs/).
+- EC-Council — [Certified SOC Analyst (CSA)](https://www.eccouncil.org/train-certify/certified-soc-analyst-csa/).

@@ -1,0 +1,119 @@
+---
+title: "Laboratorio 2 · Auditoría y análisis de logs de Windows"
+description: "Configuración de auditoría de inicio de sesión, generación controlada de intentos fallidos y localización del evento 4625 con Logon Type 8."
+module: "03"
+practice: 1
+date: 2026-10-30
+updated: 2026-11-19
+categories:
+  - "Log Management"
+  - "Windows"
+tags:
+  - "Event Viewer"
+  - "Windows Security Logs"
+  - "4625"
+  - "Logon Type 8"
+  - "Audit Policy"
+tools:
+  - "Local Security Policy"
+  - "Event Viewer"
+  - "Hydra 9.6"
+  - "FTP"
+  - "Windows Server 2022"
+status: published
+featured: true
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical se preparan en local y quedan pendientes de alojamiento externo y revisión de permisos antes de publicarse.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Configurar la auditoría de inicios de sesión en Windows, generar eventos de autenticación fallida en un servicio FTP de laboratorio y localizar el rastro en el registro de seguridad mediante el evento 4625.
+
+## Contexto y entorno del laboratorio
+
+La práctica se realiza en la máquina **WebServer2022** del laboratorio, con Windows Server y el servidor FTP utilizado en los ejercicios anteriores. La máquina atacante Ubuntu ejecuta Hydra para generar intentos de autenticación. El servidor está configurado para auditar eventos de inicio de sesión correctos y fallidos.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Local Security Policy | Configuración de la auditoría de eventos de inicio de sesión |
+| Event Viewer | Revisión del registro Security |
+| Hydra 9.6 | Generación controlada de intentos FTP |
+| FTP | Servicio de autenticación observado |
+| Windows Server 2022 | Máquina que produce los eventos |
+
+## Procedimiento realizado
+
+1. Se abre **Local Security Policy** y se navega hasta **Local Policies → Audit Policy**.
+2. En **Audit logon events** se habilitan las casillas **Success** y **Failure**.
+3. Desde la máquina atacante se ejecuta Hydra contra el FTP para producir intentos fallidos y un acceso correcto:
+
+```bash
+hydra -L '/root/Wordlist/userlist.txt' -P '/root/Wordlist/pass.txt' ftp://10.10.10.12
+```
+
+4. En **Event Viewer** se abre **Windows Logs → Security** y se filtra por el evento **4625**.
+5. Se aplica un filtro XML para limitar los resultados al evento 4625 con `Logon Type 8`.
+6. Se abre uno de los eventos y se revisan sus campos: cuenta, tipo de logon, resultado y equipo.
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-03/practice-01/lab2-event4625-filter.webp",
+    "alt": "Filtro de Event Viewer para el evento 4625",
+    "caption": "Configuración del filtro por Event ID 4625 en el registro Security."
+  },
+  {
+    "src": "/images/labs/module-03/practice-01/lab2-event4625-detail.webp",
+    "alt": "Detalle del evento 4625 con Logon Type 8",
+    "caption": "El evento muestra Audit Failure y Logon Type 8 para la cuenta Administrator."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+| Campo observado | Valor |
+| --- | --- |
+| Event ID | 4625 |
+| Logon Type | 8 |
+| Level | Information |
+| Keywords | Audit Failure |
+| Account Name | Administrator |
+| Computer | WebServer2022 |
+| Log Name | Security |
+
+## Análisis de resultados
+
+**Observado:** el filtro devuelve eventos 4625 y el detalle seleccionado muestra `Logon Type: 8`, `Audit Failure` y la cuenta `Administrator`. El registro Security contiene el evento y el equipo de origen del log es `WebServer2022`.
+
+**Interpretación:** el tipo de logon 8 corresponde a autenticación de red en texto claro, coherente con FTP. Una secuencia de 4625 con Logon Type 8 en un intervalo corto es un indicador de fuerza bruta. El evento 4624 sería el contrapunto de un acceso correcto; la práctica se centra en el fallo y en la evidencia del intento.
+
+La auditoría debe estar habilitada antes del incidente. Sin política de auditoría, el evento no existe, y sin revisión periódica el registro puede rotar o pasar desapercibido. La retención y el envío centralizado son parte del control, no un extra.
+
+## Conclusiones
+
+El log de seguridad es útil cuando se configura y se consulta con una pregunta concreta. El evento 4625 no dice "ataque" por sí solo: el valor está en el tipo de logon, la repetición, el usuario y la correlación con otros eventos. La práctica convierte una alerta genérica en una secuencia verificable.
+
+## Aprendizajes
+
+- La auditoría debe habilitarse antes del incidente; sin política no hay evento que investigar.
+- El evento 4625 gana significado al leer Logon Type, repetición y cuenta afectada.
+
+## Referencias
+
+- Microsoft Learn — [Event 4625: An account failed to log on](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625).
+- Microsoft Learn — [Event 4624: An account was successfully logged on](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4624).
+- MITRE ATT&CK — [Brute Force (T1110)](https://attack.mitre.org/techniques/T1110/).

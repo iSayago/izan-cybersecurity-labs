@@ -1,0 +1,145 @@
+---
+title: "Laboratorio 1 · Análisis de IoCs con Wireshark"
+description: "Lectura de capturas PCAP de laboratorio para identificar scanning, OS fingerprinting, fuerza bruta FTP y tráfico de Pony Malware."
+module: "02"
+practice: 6
+date: 2026-10-28
+updated: 2026-11-19
+categories:
+  - "Threat Analysis"
+  - "Network Forensics"
+tags:
+  - "Wireshark"
+  - "PCAP"
+  - "IoCs"
+  - "Malware"
+  - "Network Scanning"
+tools:
+  - "Wireshark 4.4.0"
+  - "Windows Server 2022"
+  - "PCAP de laboratorio"
+  - "EC-Council Practice Labs"
+status: published
+featured: false
+---
+
+import Callout from '../../../src/components/Callout.astro';
+import EvidenceGallery from '../../../src/components/EvidenceGallery.astro';
+
+<Callout title="Alcance y publicación" variant="note">
+Práctica realizada en el entorno de laboratorio del programa **SOC Analyst (CSA)** de EC-Council. El informe es una reconstrucción técnica propia a partir de la grabación; no reproduce el manual del curso ni atribuye la creación del laboratorio. Las capturas se limitan al área de la máquina. La versión editada del vídeo y el resumen vertical se preparan en local y quedan pendientes de alojamiento externo y revisión de permisos antes de publicarse.
+</Callout>
+
+<Callout title="Sobre la grabación" variant="warning">
+La pista de audio original no contiene narración inteligible: en Lab 1 está en silencio digital y en Lab 2 solo hay ruido de fondo. El procedimiento se ha reconstruido a partir de la imagen, los textos visibles y los resultados que aparecen en pantalla. No se han inventado explicaciones del instructor ni comandos que no se vean en la grabación.
+</Callout>
+
+## Objetivo
+
+Utilizar Wireshark para reconocer indicadores de compromiso en capturas de red y explicar qué preguntas responde cada filtro antes de formular una conclusión.
+
+## Contexto y entorno del laboratorio
+
+La práctica se realiza en la máquina Windows Server del laboratorio, con Wireshark 4.4.0 instalado. Las capturas analizadas son **PCAP de ejemplo proporcionados por el curso**, no tráfico generado por una víctima real. La evidencia demuestra el método de análisis, no una intrusión ocurrida en producción.
+
+Los archivos utilizados incluyen `Ioc_TCPHalfScanAttempt`, `Ioc_TCPNullScanAttempt`, `Ioc_OSFingerprintingAttempt`, `Ioc_BruteForceAttempt` y `Ioc_PonyMalware`.
+
+## Herramientas utilizadas
+
+| Herramienta | Uso real en la práctica |
+| --- | --- |
+| Wireshark 4.4.0 | Apertura de PCAP y aplicación de filtros de visualización |
+| Windows Server 2022 | Equipo de análisis del laboratorio |
+| PCAP de laboratorio | Capturas de ejemplo para el análisis de IoCs |
+
+## Procedimiento realizado
+
+1. Se abre Wireshark y se cargan las capturas desde la carpeta de sample PCAP del módulo.
+2. Para el intento de TCP Half Scan se aplican filtros de SYN y SYN+ACK:
+
+```text
+tcp.flags.syn==1
+tcp.flags.syn==1 and tcp.flags.ack==1
+```
+
+3. Para el intento de TCP Null Scan se revisan las respuestas RST/ACK desde el objetivo:
+
+```text
+ip.src==10.10.10.12 and tcp.flags==0x014
+```
+
+4. Para OS fingerprinting se buscan SYN con ventanas pequeñas:
+
+```text
+(tcp.flags==0x02)&&(tcp.window_size < 1025)
+```
+
+5. Para la fuerza bruta FTP se filtran las respuestas del servidor:
+
+```text
+ftp.response.code==220
+```
+
+6. Para el PCAP de Pony Malware se filtran las peticiones POST y se revisan los dominios y rutas solicitadas:
+
+```text
+http.request.method=="POST"
+```
+
+## Evidencias y capturas
+
+<EvidenceGallery
+  images={[
+  {
+    "src": "/images/labs/module-02/practice-06/lab1-wireshark-nullscan.webp",
+    "alt": "Filtro de Wireshark para respuestas RST/ACK de un TCP Null Scan",
+    "caption": "El filtro muestra respuestas RST/ACK asociadas al intento de null scan."
+  },
+  {
+    "src": "/images/labs/module-02/practice-06/lab1-wireshark-osfingerprint.webp",
+    "alt": "Filtro de Wireshark para OS fingerprinting",
+    "caption": "SYN con ventana pequeña, patrón compatible con fingerprinting."
+  },
+  {
+    "src": "/images/labs/module-02/practice-06/lab1-wireshark-ftpbrute.webp",
+    "alt": "Análisis de fuerza bruta FTP en Wireshark",
+    "caption": "Respuestas del servidor FTP durante los intentos de autenticación."
+  },
+  {
+    "src": "/images/labs/module-02/practice-06/lab1-wireshark-pony.webp",
+    "alt": "Tráfico HTTP POST del PCAP de Pony Malware",
+    "caption": "Peticiones POST y dominios observados en la captura de ejemplo."
+  }
+]}
+  note="Capturas extraídas de la grabación original y recortadas al área de la máquina. El panel de instrucciones del curso se ha omitido."
+/>
+
+## Análisis de resultados
+
+**Observado:**
+
+- En el PCAP de half scan aparecen numerosos SYN y respuestas SYN+ACK/RST compatibles con un barrido de puertos.
+- El PCAP de null scan muestra respuestas RST/ACK desde el objetivo; el patrón debe interpretarse junto con los flags del intento.
+- El filtro de OS fingerprinting devuelve SYN con `tcp.window_size` inferior a 1025.
+- El PCAP de FTP contiene respuestas del servicio y un volumen de intentos compatible con fuerza bruta.
+- El PCAP de Pony contiene consultas DNS y peticiones HTTP POST hacia un servidor remoto, incluyendo rutas y nombres de archivo usados por malware.
+
+**Interpretación:** Wireshark permite pasar de "hay mucho tráfico" a una hipótesis concreta: tipo de actividad, origen, destino, protocolo y secuencia. Ningún filtro aislado demuestra compromiso; la conclusión depende de la combinación de flags, puertos, repetición y contexto.
+
+También es importante distinguir el análisis de un PCAP de ejemplo de la captura de una máquina comprometida. En este caso, el valor está en el método: seleccionar una pregunta, aplicar un filtro, leer la secuencia y documentar el límite de la conclusión.
+
+## Conclusiones
+
+El análisis de red es una actividad de preguntas y verificación. Los filtros son herramientas para reducir el ruido, no para sustituir el razonamiento. La práctica refuerza la necesidad de conservar capturas, registrar los filtros aplicados y explicar qué se ha observado frente a lo que se interpreta.
+
+## Aprendizajes
+
+- Un filtro de Wireshark reduce el ruido, pero la conclusión depende del contexto y de varios paquetes.
+- Los PCAP de ejemplo permiten practicar el método sin confundirlos con evidencia de una víctima real.
+
+## Referencias
+
+- Wireshark — [Display Filter Reference](https://www.wireshark.org/docs/dfref/).
+- MITRE ATT&CK — [Network Service Discovery (T1046)](https://attack.mitre.org/techniques/T1046/).
+- MITRE ATT&CK — [Application Layer Protocol (T1071)](https://attack.mitre.org/techniques/T1071/).
+- EC-Council — [Certified SOC Analyst (CSA)](https://www.eccouncil.org/train-certify/certified-soc-analyst-csa/).
