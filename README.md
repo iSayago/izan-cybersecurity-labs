@@ -14,12 +14,11 @@ qué sigue pendiente**. No es una landing de servicios ni una plantilla de marke
 - **Contenido:** colecciones locales en `content/`, sin backend, sin base de datos y sin
   servicios de pago obligatorios.
 
-> **Rama de revisión de laboratorios.** Este árbol incluye 10 informes de los Laboratorios
-> 1 y 2 (6 + 4 ejercicios), sus evidencias y los metadatos. Están integrados en local con
-> `status: published` para poder validar el build, pero **no se han desplegado**: antes de
-> fusionar hay que revisar la exactitud y los permisos de publicación del material del
-> curso. Los MP4 editados y los resúmenes verticales están en `media-work/videos/`, fuera
-> de Git. Ver `TOOLS_USED.md` y `VIDEO_HOSTING.md`.
+> **Laboratorios 1 y 2.** Este árbol incluye 10 informes de los Laboratorios 1 y 2
+> (6 + 4 ejercicios), sus evidencias y sus metadatos. Los informes están integrados y se
+> publican con `status: published`; los MP4 editados y los resúmenes verticales están en
+> `media-work/videos/`, fuera de Git, a la espera de alojamiento externo. Ver
+> `TOOLS_USED.md` y `VIDEO_HOSTING.md`.
 
 [![Deploy to GitHub Pages](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml/badge.svg)](https://github.com/iSayago/izan-cybersecurity-labs/actions/workflows/deploy.yml)
 
